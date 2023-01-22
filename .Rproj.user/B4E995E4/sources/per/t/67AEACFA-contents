@@ -1,0 +1,76 @@
+---
+title: 
+author: 
+date: 
+output: 
+  revealjs::revealjs_presentation: 
+    theme: simple
+    highlight: haddock
+    center: true
+    transition: slide
+    css: style.css
+---
+
+ 
+## Data Science<br/> 
+<sub_title1>Slides à Ajouter</sub_title1> <img src="intro.png"  id="img_intro">
+
+
+
+## Quel type de données peut-on importer?
+
+<!--<span class="fragment fade-in"> On peut importer tous type de données dans R </span> -->
+
+> * .txt, .csv, .xlsx (classique)
+> * Base de données (ORACLE, Microsoft Server, etc)
+> * Images, format audio ou autre (non-structuré)
+
+
+## Workflow Projet Data Science
+
+```{r,  warning=FALSE, message=FALSE, echo=FALSE}
+library(visNetwork)
+library(dplyr)
+
+
+nodes <- data.frame(id = 0:6, 
+                    group = LETTERS[seq(1: 7)],
+                    label=c('Problem', 'Import', 'Transform', 'Visualize', 'Model', 'Communicate', 'Diffusion'))
+edges <- data.frame(from = c(0,1,2,3,4,4,5), to = c(1,2,3,4,5,6,2))
+
+visNetwork(nodes, edges, width = "100%") %>% 
+  visEdges(arrows =list(to = list(enabled = TRUE, scaleFactor = 2))) %>% 
+  visGroups(groupname = "A", shape = "icon", 
+            icon = list(code = "f0eb" , color = "orange"
+            )) %>%
+  visGroups(groupname = "B", shape = "icon", 
+            icon = list(code = "f1c0" , color = "grey"
+                        )) %>%
+  visGroups(groupname = "C", shape = "icon", 
+            icon = list(code = "f0d0" , color = "#175186"
+            )) %>%
+  visGroups(groupname = "D", shape = "icon", 
+            icon = list(code = "f200" , color = "#175186"
+            )) %>%
+  visGroups(groupname = "E", shape = "icon", 
+            icon = list(code = "f1b3", color = "#175186"
+            )) %>%
+  visGroups(groupname = "F", shape = "icon", 
+            icon = list(code = "f086", color = "#175186"
+            ))%>%
+  visGroups(groupname = "G", shape = "icon", 
+            icon = list(code = "f09e", color = "#bca480"
+            )) %>%
+  addFontAwesome()
+
+
+
+```
+
+
+
+
+
+
+
+

@@ -1,0 +1,33 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1593069813982.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "6A35C04E",
+    "lastKnownWriteTime" : 0,
+    "last_content_update" : 1593069813982,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "E60FE1D7",
+        "caption" : "sub_fish",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=sub_fish&cache_key=E60FE1D7",
+        "displayedObservations" : 28,
+        "environment" : "",
+        "expression" : "sub_fish",
+        "object" : "sub_fish",
+        "preview" : 0,
+        "totalObservations" : 28,
+        "variables" : 7
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 27,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

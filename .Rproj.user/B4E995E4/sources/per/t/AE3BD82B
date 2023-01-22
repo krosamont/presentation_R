@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1592815885683.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1869350033",
+    "id" : "AE3BD82B",
+    "lastKnownWriteTime" : 1593523526,
+    "last_content_update" : 1593523526748,
+    "path" : "~/Documents/dataScience/bdl_presentation/0_103_graph_R.Rmd",
+    "project_path" : "0_103_graph_R.Rmd",
+    "properties" : {
+        "cursorPosition" : "408,0",
+        "last_setup_crc32" : "",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 11,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

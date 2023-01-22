@@ -1,0 +1,423 @@
+---
+title: 
+author: 
+date: 
+output: 
+  revealjs::revealjs_presentation: 
+    theme: simple
+    highlight: haddock
+    center: true
+    transition: slide
+    css: style.css
+---
+
+
+## Data Science<br/> 
+<sub_title1>Visualization: Line Chart </sub_title1> <img src="intro.png"  id="img_intro">
+
+## <span style="color:white;"> Séance Précendente </span>{data-background=#7ac58c}
+<br>
+
+> * <span style="color:white;"> `df <- read_csv('~path')` </span>
+> * <span style="color:white;"> `df2 <- df %>% dplyr::function()`  </span>
+> * <span style="color:white; ">  `write_csv(df2, '~path2')`  </span>
+
+<br><br>
+<span style="color:#f3eaca; 
+font-size: larger;" class="fragment fade-in"> Import -> Modify -> Save</span>
+
+
+## <span style="color:black;">Introduction à la visualisation</span>{data-background=#eaf3f9}
+<!--
+> * <span style="color:white;"> line chart </span>
+> * <span style="color:white;"> scatter plot </span>
+> * <span style="color:white;"> pie chart  </span>
+> * <span style="color:white;"> bar plot  </span>
+-->
+
+## Type de graphiques
+<img height="350" align="center"  src="image/graph_descriptions.png"/> 
+
+
+## Pourquoi communiquer via un graphique? 
+<!-- par rapport à un tableau -->     
+
+> * Synthétisation de l'information
+> * Plus facile à analyser
+> * Plus rapide à analyser
+
+##  {data-background=#eaf3f9}
+<p style="margin-bottom:2em;"></p>
+<div style="margin-bottom:1em; font-size: x-large; " class='multiCol'>
+<div class='col'>Les graphiques sont analysés <span style="color:green; ">60 000</span> fois plus vite que des mots</div>
+<div class='col'>Des contenus avec des visuels amenent <span style="color:green; ">94%</span> plus de vues en moyennes</div>
+</div>
+
+<div style="font-size: x-large; " class='multiCol'>
+<div class='col'>Il suffit de <span style="color:green; ">1/10s</span> pour comprendre un visuel, comparer à 60s pour lire 200 mots</div>
+<div class='col'><span style="color:green; ">65%</span> d'un contenu visuel est retenu contre 10% d'un texte</div>
+</div>
+
+
+
+
+<!--
+## Line chart {data-transition="none-out"}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(ggplot2)
+ggplot( ) +
+ggtitle("Titre") +
+xlab("Axe Horizontal (continue)") +
+ylab("Axe Vertical (continue)") +
+theme_minimal() +
+theme(plot.title = element_text(hjust = 0.5))
+```
+-->
+## <span style="color:black;">Line chart</span>{data-background=#eaf3f9}
+
+## Line chart {data-transition="none-in"}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(readxl)
+library(dplyr)
+library(tidyr)
+stocks <- read_xlsx('/Users/woza/Documents/dataScience/bdl_presentation/data/session3/stocks.xlsx', 
+                    sheet = 2, skip = 3)
+
+
+stocks_long <- stocks %>% 
+  rename(stocks=date) %>% 
+  pivot_longer(-stocks, names_to = 'date', values_to = 'val') %>% 
+  mutate(date=as.Date(as.numeric(date), origin = "1899-12-30"),
+         val=as.numeric(val)) %>% 
+  filter(date >as.Date('2013-01-01')) %>% 
+  group_by(stocks) %>% 
+  mutate(indice= 100*val/first(val))
+
+ggplot(data=stocks_long %>% filter(stocks=='AEMD US  EQUITY'))+
+  geom_line(aes(x=date, y=indice, color=stocks))+
+  ggtitle("Evolution du cours d'Aethlon Medical Inc \n à la bourse entre 2013 et 2018") +
+  xlab("Date") +
+  ylab("Valeur ($)") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        legend.position="none")
+```
+
+
+## Line chart {data-transition="none"}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
+ggplot(data=stocks_long %>% filter(stocks=='AEMD US  EQUITY'))+
+  geom_line(aes(x=date, y=indice, color=stocks))+
+  ggtitle("Evolution du cours d'Aethlon Medical Inc \n à la bourse entre 2013 et 2018") +
+  xlab("Date") +
+  ylab("Valeur ($)") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 15,  face = "bold", hjust = 0.5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        axis.title.x = element_text(colour = "darkgreen", face = "bold"),
+        legend.position="none")
+```
+
+## Line chart {data-transition="none"}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
+ggplot(data=stocks_long %>% filter(stocks=='AEMD US  EQUITY'))+
+  geom_line(aes(x=date, y=indice, color=stocks))+
+  ggtitle("Evolution du cours d'Aethlon Medical Inc \n à la bourse entre 2013 et 2018") +
+  xlab("Date") +
+  ylab("Valeur ($)") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 15,  face = "bold", hjust = 0.5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        axis.title.x = element_text(colour = "darkgreen", face = "bold"),
+        axis.title.y = element_text(colour = "darkgreen", face = "bold"),
+        legend.position="none")
+```
+
+## Line chart {data-transition="none"}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
+ggplot(data=stocks_long %>% filter(stocks=='AEMD US  EQUITY'))+
+  geom_line(aes(x=date, y=indice, color=stocks))+
+  ggtitle("Evolution du cours d'Aethlon Medical Inc \n à la bourse entre 2013 et 2018") +
+  xlab("Date") +
+  ylab("Valeur ($)") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 15, colour = "darkgreen", face = "bold", hjust = 0.5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        axis.title.x = element_text(colour = "darkgreen", face = "bold"),
+        axis.title.y = element_text(colour = "darkgreen", face = "bold"),
+        legend.position="none")
+```
+
+
+
+## Code {data-transition="none"}
+```{r, eval=FALSE, warning=FALSE, message=FALSE}
+library(ggplot)
+ggplot(data= YOUR_DATASET)+
+  
+  geom_line(aes(x= X_AXIS_VAR, y= Y_AXIS_VAR, color= COLOR_VAR)) +
+
+  ggtitle("YOUR TITLE")+ # The Graph title
+  xlab("YOUR X LABEL") + # If you want something different 
+  ylab("YOUR Y LABEL") + # from X_AXIS_VAR & Y_AXIS_VAR
+  
+  theme_minimal() +      # Optional
+  theme(plot.title = element_text(size = 15,  hjust = 0.5), # Optional
+        panel.grid.minor = element_blank(), # Optional
+        panel.grid.major.x = element_blank(), # Optional
+        )
+```
+
+
+
+## <span style="color:white;">Instructions</span>{data-background=#bca480}
+> * <span style="color:white;"> Lire le fichier `stocks.xlsx` sheet 2 </span>
+> * <span style="color:white;"> Format adéquate pour faire un graphe </span>
+> * <span style="color:white;"> Faire le graphe </span>
+> * <span style="color:white;"> _Pimp your graph_ </span>
+
+
+## Solution proposée{data-transition="none"}
+```{r, eval=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(readxl)
+library(janitor)
+
+stocks <- read_xlsx('/data/stocks.xlsx', sheet = 2, skip = 3)
+
+
+stocks_long <- stocks %>% 
+  rename(stocks=date) %>% 
+  pivot_longer(-stocks, names_to = 'date', values_to = 'val') %>% 
+  mutate(date=as.Date(as.numeric(date), origin = "1899-12-30"),
+         val=as.numeric(val)) %>% 
+  filter(date >as.Date('2013-01-01')) %>% 
+  group_by(stocks) %>% 
+  mutate(indice= 100*val/first(val))
+
+p1 <- ggplot(data=stocks_long %>% filter(stocks=='AEMD US  EQUITY'))+
+  geom_line(aes(x=date, y=indice, color=stocks))
+
+p2 <- ggplot(data=stocks_long %>% filter(stocks=='AEMD US  EQUITY'))+
+  geom_line(aes(x=date, y=indice, color=stocks))+
+  ggtitle("Evolution du cours d'Aethlon Medical Inc \n à la bourse entre 2013 et 2018") +
+  xlab("Date") +
+  ylab("Valeur ($)") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 15, colour = "red", face = "bold", hjust = 0.5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        axis.title.x = element_text(colour = "red", face = "bold"),
+        axis.title.y = element_text(colour = "red", face = "bold"),
+        legend.position="none")
+```
+
+## Solution proposée{data-transition="none"}
+```{r, eval=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(readxl)
+library(janitor)
+
+stocks <- read_xlsx('/data/stocks.xlsx', sheet = 2, skip = 3)
+
+
+stocks_long <- stocks %>% 
+  rename(stocks=date) %>% 
+  pivot_longer(-stocks, names_to = 'date', values_to = 'val') %>% 
+  mutate(date=as.Date(as.numeric(date), origin = "1899-12-30"),
+         val=as.numeric(val)) %>% 
+  filter(date >as.Date('2013-01-01')) %>% 
+  group_by(stocks) %>% 
+  mutate(indice= 100*val/first(val))
+
+p1 <- ggplot(data=stocks_long %>% filter(stocks=='AEMD US  EQUITY'))+
+  geom_line(aes(x=date, y=indice, color=stocks))
+
+p2 <- p1+
+  ggtitle("Evolution du cours d'Aethlon Medical Inc \n 
+          à la bourse entre 2013 et 2018") +
+  xlab("Date") +
+  ylab("Valeur ($)") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 14, colour = "#717171", face = "bold", hjust = 0.5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        axis.title.x = element_text(colour = "#717171"),
+        axis.title.y = element_text(colour = "#717171"),
+        legend.position="none")
+```
+
+
+## Rendu Visuel{data-transition="none"}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(ggplot2)
+
+stocks <- read_xlsx('/Users/woza/Documents/dataScience/bdl_presentation/data/session3/stocks.xlsx', sheet = 2, skip = 3)
+
+
+stocks_long <- stocks %>% 
+  rename(stocks=date) %>% 
+  pivot_longer(-stocks, names_to = 'date', values_to = 'val') %>% 
+  mutate(date=as.Date(as.numeric(date), origin = "1899-12-30"),
+         val=as.numeric(val)) %>% 
+  filter(date >as.Date('2013-01-01')) %>% 
+  group_by(stocks) %>% 
+  mutate(indice= 100*val/first(val))
+
+ggplot(data=stocks_long %>% filter(stocks=='AEMD US  EQUITY'))+
+  geom_line(aes(x=date, y=indice, color=stocks))+
+  ggtitle("Evolution du cours d'Aethlon Medical Inc \n à la bourse entre 2013 et 2018") +
+  xlab("Date") +
+  ylab("Valeur ($)") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 14, colour = "#717171", face = "bold", hjust = 0.5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        axis.title.x = element_text(colour = "#717171"),
+        axis.title.y = element_text(colour = "#717171"),
+        legend.position="none")
+```
+
+
+
+## Pour aller plus loin{data-transition="none"}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+stocks_cat <- read_xlsx('/Users/woza/Documents/dataScience/bdl_presentation/data/session3/stocks.xlsx', 
+                        sheet = 3) %>% 
+  select(TICKER, GICS_SECTOR_NAME, CURRENCY, COUNTRY_OF_LARGEST_REVENUE) %>% 
+  clean_names
+
+
+stocks_long2 <- stocks_long %>% 
+  inner_join(stocks_cat, by=c('stocks'='ticker')) %>% 
+  mutate(new_stocks = str_trim(str_sub(stocks,start=1,end=-7)),
+         new_stocks = factor(new_stocks, levels=c("7267 JP", "EM IM", "HUSQB SS", "TSCO US",
+                                                  "AEMD US",  "BRKR US", "CPHD US", "FLDM US",
+                                                  "AGCO US", "CARR IM", "DE US", "TTC US"
+                                                  )),
+         new_size= ifelse(new_stocks %in% c("EM IM", "BRKR US", "TTC US"),3,1),
+         font = ifelse(new_stocks %in% c("EM IM", "BRKR US", "TTC US"), "bold", "plain")) 
+
+
+ggplot(data=stocks_long2)+
+  geom_line(aes(x=date, y=indice, color=new_stocks, size= new_size)) +
+  scale_size_continuous(range = c(0.5,0.75))+
+  geom_text(data=stocks_long2 %>% filter(date==max(date)) %>%
+                                           mutate(indice= case_when(
+                                             new_stocks %in% c('FLDM US', 'DE US') ~ indice+20,
+                                             new_stocks %in% c('EM IM', 'BRKR US') ~ indice+40,
+                                             new_stocks %in% c('AEMD US', 'AGCO US', 'CPHD US') ~ indice-20,
+                                             TRUE ~ indice)) ,
+            aes(x=date+0.5,y=indice, label=new_stocks, fontface = font, color=new_stocks, hjust = -.03), 
+            size= 2
+            #check_overlap = TRUE
+            ) +
+  # scale_size_continuous(range=c(2, 3), guide="none") +
+   expand_limits(x = c(min(stocks_long2$date), lubridate::ymd("2019-01-01")))+
+  scale_color_manual(values=c('#b2b4b7', '#6891d0', '#b2b4b7', '#b2b4b7', 
+                              '#b2b4b7', '#6891d0', '#b2b4b7', '#b2b4b7', 
+                              '#b2b4b7', '#b2b4b7', '#b2b4b7', '#6891d0'))+
+  theme_minimal() +
+  theme(#plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
+        panel.grid.minor = element_blank(),
+        legend.position="none"
+  ) +
+  facet_wrap(~gics_sector_name, nrow = 3)
+```
+
+
+## `facet_wrap()` {data-transition="none"}
+```{r, eval=FALSE, warning=FALSE, message=FALSE}
+ggplot(data=stocks_long2)+
+  geom_line(aes(x=date, y=indice, color=new_stocks)) +
+  labs(color ="Stocks") +
+  theme_minimal() +
+  facet_wrap(~gics_sector_name, nrow = 3)
+```
+
+<img  height="390"  src="image/session3/facet_wrap.png">
+
+
+## <span style="color:white;">Instructions</span>{data-background=#bca480}
+> * <span style="color:white;"> Joindre `stocks.xlsx` sheet 2 et 3 </span>
+> * <span style="color:white;"> Faire un graphe avec `facet_wrap()`</span>
+> * <span style="color:white;"> _Pimp your graph_ </span>
+
+## <span style="color:black;">Graphique Interactif </span>{data-background=#eaf3f9}
+
+## Rendu Visuel
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(highcharter)
+
+stocks_long2 <- stocks_long2 %>% 
+  mutate(new_stocks2= paste0(new_stocks,' (',gics_sector_name, ')')) 
+
+hchart(stocks_long2, type="line", hcaes(x = date, y = indice, group = new_stocks2)) %>% 
+  hc_title(text = "Stock Comparison<br>from 2013 to 2019", useHTML=TRUE)
+```
+
+## Code
+```{r, eval=FALSE, warning=FALSE, message=FALSE}
+library(highcharter)
+
+stocks_long2 <- stocks_long2 %>% 
+  mutate(new_stocks2= paste0(str_sub(new_stocks,start=1, end=-7),'(',gics_sector_name, ')'))
+
+hchart(stocks_long2, type="line", hcaes(x = date, y = indice, group = new_stocks2)) %>% 
+  hc_title(text = "Stock Comparison<br>from 2013 to 2019", useHTML=TRUE)
+```
+
+
+
+
+## <span style="color:white;">Récapitulatif </span>{data-background=#7ac58c}
+<!--<img src="transition1.png"  id="img_transition"> -->
+
+
+
+## {data-background=#7ac58c}
+> * <span style="color:white;"> Graphique : </span>
+> * <span style="color:white;"> &ensp; Titre, noms des axes, légende </span>
+> * <span style="color:white;"> Line chart : </span>
+> * <span style="color:white;"> &ensp; 2 variables continues</span>
+> * <span style="color:white;"> &ensp; Beaucoup de données sur l'axe horizontal</span>
+> * <span style="color:white;"> Code : </span>
+> * <span style="color:white;"> &ensp; `ggplot()+geom_line(DATA, aes(X,Y))` (Normal) </span>
+> * <span style="color:white;"> &ensp; `hchart(DATA,'line',hcaes(X,Y))` (Interactif) </span>
+
+## {data-background=#00bdf2} 
+<span style="color:white;">Merci pour votre attention </span>
+
+## <span style="color:white;">Questions? </span>{data-background=#00bdf2}
+<!--<img src="transition2.png"  id="img_transition2"> -->
+
+<!--
+## <span style="color:white;"> </span>{data-background=#00bdf2}
+> * <span class="fragment fade-out" style="color:white;">Est-ce que dans notre environnement de travail, ça vaut la peine?</span> 
+> * <span style="color:white;">Ou trouver un exemple de présentation?</span>
+-->
+
+## <span style="color:white;">Contact</span> {data-background=#00bdf2}
+[Kevin Rosamont Prombo](kevinrosamont@ymail.com)
+
+<!--
+> *  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color:black;"> Un package et ses fonctions </span>
+> *  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color:black;"> Fonction avancées Regex </span>
+> *  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color:black;"> Fonctionnement Shiny </span>
+-->
+
+
+
+
+

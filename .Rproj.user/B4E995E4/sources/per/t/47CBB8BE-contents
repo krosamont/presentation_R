@@ -1,0 +1,290 @@
+---
+title: 
+author: 
+date: 
+output: 
+  revealjs::revealjs_presentation: 
+    theme: simple
+    highlight: haddock
+    center: true
+    transition: slide
+    css: style.css
+---
+
+
+## Data Science<br/> 
+<sub_title1>Visualization: Bar Plot </sub_title1> <img src="intro.png"  id="img_intro">
+
+## <span style="color:white;"> Séance Précendente </span>{data-background=#7ac58c}
+<br>
+
+> * <span style="color:white;"> Scatter Plot : </span>
+> * <span style="color:white;"> &ensp; 2 variables continues</span>
+> * <span style="color:white;"> &ensp; Comparer 2 variables, apercevoir des tendances</span>
+> * <span style="color:white;"> Code : </span>
+> * <span style="color:white;"> &ensp; `ggplot()+geom_point(DATA,aes(X,Y))` (Normal) </span>
+> * <span style="color:white;"> &ensp; `hchart(DATA,'scatter',hcaes(X,Y))` (Interactif) </span>
+> * <span style="color:white;"> &ensp; `slice()` en Manipulation de données </span>
+
+
+## Type de graphiques
+<img height="350" align="center"  src="image/graph_descriptions.png"/> 
+
+<!--
+## <span style="color:black;">Scatter Plot </span>{data-background=#eaf3f9}
+-->
+
+## Bar plot
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(janitor)
+
+
+fish <- read_csv("/Users/woza/Documents/dataScience/bdl_presentation/data/session5/fish_ca_data.csv") %>%
+  clean_names() %>% 
+  filter(value!=':' & time<2019) %>% 
+  mutate(value=as.numeric(str_remove_all(value,'[[:space:]]')),
+         geo = ifelse(str_detect(geo,'Germany'),'Germany', geo)) %>% 
+  select(-flag_and_footnotes)
+
+bar1 <- ggplot(fish %>% filter(geo=='Norway' & time<=2016)) + 
+  geom_bar(aes(x=time, y=value/10^6, fill=geo), 
+           stat="identity", position=position_dodge())+
+  ggtitle("Evolution du volume de la pêche\nen Norvège entre 2000 et 2016") +
+  ylab("Poids* (millions de tonnes)") +
+  xlab("Année") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        legend.position = 'none')+
+  expand_limits(y = c(0,3))
+
+bar1
+
+```
+
+## Code Scatter Plot 
+```{r, eval=FALSE, warning=FALSE, message=FALSE}
+library(ggplot)
+ggplot(data= YOUR_DATASET)+
+  
+  geom_bar(aes(x= X_AXIS_VAR, y= Y_AXIS_VAR, fill= COLOR_VAR), stat="identity") +
+
+  ggtitle("YOUR TITLE")+ # The Graph title
+  xlab("YOUR X LABEL") + # If you want something different 
+  ylab("YOUR Y LABEL") + # from X_AXIS_VAR & Y_AXIS_VAR
+  
+  theme_minimal() +      # Optional
+  theme(plot.title = element_text(size = 15,  hjust = 0.5), # Optional
+        panel.grid.minor = element_blank(), # Optional
+        panel.grid.major.x = element_blank(), # Optional
+        )
+```
+
+## <span style="color:white;">Instructions</span>{data-background=#bca480}
+> * <span style="color:white;"> Lire le fichier `fish_ca_data.csv` </span>
+> * <span style="color:white;"> Format adéquate pour faire un graphe </span>
+> * <span style="color:white;"> Faire un graphe en selectionant un pays </span>
+> * <span style="color:white;"> _Pimp your graph_ </span>
+
+
+
+## Solution Proposée
+```{r, eval=FALSE, warning=FALSE, message=FALSE}
+
+fish <- read_csv('/data/session5/fish_ca_data.csv')
+
+fish <- fish %>%
+  clean_names() %>% 
+  filter(value!=':' & time<2019) %>% 
+  mutate(value=as.numeric(str_remove_all(value,'[[:space:]]')),
+         geo = ifelse(str_detect(geo,'Germany'),'Germany', geo)) %>% 
+  select(-flag_and_footnotes)
+
+ggplot(fish %>% filter(geo=='Norway' & time<=2016)) + 
+  geom_bar(aes(x=time, y=value/10^6, fill=geo), 
+           stat="identity", position=position_dodge())+
+  ggtitle("Evolution du volume de la pêche\nen Norvège entre 2000 et 2016") +
+  ylab("Poids* (millions de tonnes)") +
+  xlab("Année") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        legend.position = 'none') +
+  expand_limits(y = c(0,3))
+
+```
+
+## Rendu Visuel
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
+bar1
+
+```
+
+
+
+## <span style="color:white;">Instructions</span>{data-background=#bca480}
+> * <span style="color:white;"> Quels sont les 3 pays de l'UE qui ont le plus gros
+volume de pêche de 2010 à 2016 </span>
+> * <span style="color:white;"> Faire un graphe affichant l'évolution du volume de pêche des 3 pays de la question précedente et un pays au choix (de 2000 à 2016)<br><span style="color:#fdfbeb;">`geom_bar(, position=position_dodge())`</span></span>
+> * <span style="color:white;"> _Pimp your graph_ </span>
+
+## Solution Proposée
+```{r, eval=FALSE, warning=FALSE, message=FALSE}
+
+fish %>% 
+  filter(time>=2010 & time <=2016) %>% 
+  group_by(geo) %>% 
+  summarise(volume= sum(value, na.rm = TRUE)) %>% 
+  arrange(desc(volume))
+
+
+```
+
+## Rendu Visuel
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+sub_geo <- c("Norway", "Spain", "Denmark", "United Kingdom" )
+sub_fish <- fish %>% 
+  filter(geo %in% sub_geo & time>=2010 & time <=2016) %>% 
+  mutate(iso = case_when( geo=="Denmark" ~ "DK",
+                          geo=="United Kingdom" ~ "UK",
+                          geo=="Spain" ~ "ES",
+                          geo=="Norway" ~ "NO"),
+         geo= factor(geo, levels = sub_geo))
+
+ggplot(sub_fish, aes(x=time, y=value/10^6, fill=geo)) + 
+  geom_bar(stat="identity", width=0.8, position=position_dodge(width=0.9))+
+  #geom_text(aes(label=iso), position = position_dodge(width=0.9), vjust = -0.25, size=2.2)+
+  # scale_fill_manual(values=c('#6891d0', '#b2b4b7', '#cfd0d2', '#dee0e2')) +
+  scale_fill_manual(values=c('#6891d0', '#b2b4b7', '#b2b4b7', '#b2b4b7')) +
+  ggtitle("Evolution du volume de la pêche\nentre 2010 et 2016") +
+  labs(fill="",
+       caption = "Source: Eurostat")+
+  ylab("Poids* (millions de tonnes)") +
+  xlab("Année") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        legend.position = 'bottom')+
+  expand_limits(y = c(0,3))
+```
+
+## Code Associé
+```{r, eval=FALSE, warning=FALSE, message=FALSE}
+
+sub_geo <- c("Norway", "Spain", "Denmark", "United Kingdom" )
+sub_fish <- fish %>% 
+  filter(geo %in% sub_geo & time>=2010 & time <=2016) %>% 
+  mutate(iso = case_when( geo=="Denmark" ~ "DK",
+                          geo=="United Kingdom" ~ "UK",
+                          geo=="Spain" ~ "ES",
+                          geo=="Norway" ~ "NO"),
+         geo= factor(geo, levels = sub_geo))
+
+ggplot(sub_fish, aes(x=time, y=value/10^6, 
+                     fill=geo)) + 
+  geom_bar(stat="identity", width=0.8, 
+           position=position_dodge(width=0.9))+
+  scale_fill_manual(values=c('#6891d0', '#b2b4b7', '#b2b4b7', '#b2b4b7')) +
+  ggtitle("Evolution du volume de la pêche\nentre 2010 et 2016") +
+  labs(fill="",
+       caption = "Source: Eurostat")+
+  ylab("Poids* (millions de tonnes)") +
+  xlab("Année") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 15, 
+                face = "bold", hjust = 0.5),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        legend.position = 'bottom')+
+  expand_limits(y = c(0,3))
+
+```
+
+
+## <span style="color:black;">Graphique Interactif </span>{data-background=#eaf3f9}
+
+## Rendu Visuel
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(highcharter)
+
+hchart(sub_fish, "column", hcaes(x=time, group = geo, y = round(value/10^6,2)), 
+       color=c('#6891d0', '#b2b4b7', '#b2b4b7', '#b2b4b7')) %>%
+  hc_tooltip(pointFormat = "{point.geo}: <b>{point.y}</b>") %>% 
+  hc_title( text="Evolution du volume de la pêche<br>entre 2010 et 2016") %>%
+  hc_xAxis(title = list(text = "Année")) %>% 
+  hc_yAxis(title = list(text = "Poids* (millions de tonnes)"))   %>% 
+  hc_credits(
+    enabled = TRUE, text = "Source: Eurostat",
+    href = "https://ec.europa.eu/eurostat/web/fisheries/data/database",
+    style = list(fontSize = "12px"))
+
+```
+
+
+## Code
+```{r, eval=FALSE, warning=FALSE, message=FALSE}
+hchart(sub_fish, "column", hcaes(x=time, group = geo, y = round(value/10^6,2)), 
+       color=c('#6891d0', '#b2b4b7', '#b2b4b7', '#b2b4b7')) %>%
+  hc_tooltip(pointFormat = "{point.geo}: <b>{point.y}</b>") %>% 
+  hc_title( text="Evolution du volume de la pêche<br>entre 2010 et 2016") %>%
+  hc_xAxis(title = list(text = "Année")) %>% 
+  hc_yAxis(title = list(text = "Poids* (millions de tonnes)"))   %>% 
+  hc_credits(
+    enabled = TRUE, text = "Source: Eurostat",
+    href = "https://ec.europa.eu/eurostat/web/fisheries/data/database",
+    style = list(fontSize = "12px"))
+```
+
+
+## <span style="color:white;">Instructions</span>{data-background=#bca480}
+> * <span style="color:white;"> Effectuer un graph interactif </span>
+> * <span style="color:white;"> _Pimp your graph_ </span>
+
+
+## <span style="color:white;">Récapitulatif </span>{data-background=#7ac58c}
+<!--<img src="transition1.png"  id="img_transition"> -->
+
+
+
+## {data-background=#7ac58c}
+> * <span style="color:white;"> Bar Plot : </span>
+> * <span style="color:white;"> &ensp; une variable continue et une variable categorielle</span>
+> * <span style="color:white;"> &ensp; Comparer des entités avec peu de points</span>
+> * <span style="color:white;"> Code : </span>
+> * <span style="color:white;"> &ensp; `ggplot()+geom_bar(DATA,aes(X,Y))` (Normal) </span>
+> * <span style="color:white;"> &ensp; `hchart(DATA,'column',hcaes(X,Y))` (Interactif) </span>
+
+
+
+## {data-background=#00bdf2} 
+<span style="color:white;">Merci pour votre attention </span>
+
+## <span style="color:white;">Questions? </span>{data-background=#00bdf2}
+<!--<img src="transition2.png"  id="img_transition2"> -->
+
+<!--
+## <span style="color:white;"> </span>{data-background=#00bdf2}
+> * <span class="fragment fade-out" style="color:white;">Est-ce que dans notre environnement de travail, ça vaut la peine?</span> 
+> * <span style="color:white;">Ou trouver un exemple de présentation?</span>
+-->
+
+## <span style="color:white;">Contact</span> {data-background=#00bdf2}
+[Kevin Rosamont Prombo](kevinrosamont@ymail.com)
+
+
+<!--
+> *  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color:black;"> Un package et ses fonctions </span>
+> *  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color:black;"> Fonction avancées Regex </span>
+> *  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color:black;"> Fonctionnement Shiny </span>
+-->
+
+
+
+
+

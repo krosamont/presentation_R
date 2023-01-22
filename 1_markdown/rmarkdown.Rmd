@@ -1,0 +1,131 @@
+---
+title: 
+author: 
+date: 
+output: 
+  revealjs::revealjs_presentation: 
+    theme: simple
+    highlight: haddock
+    center: true
+    transition: slide
+    css: ../assets/css/style.css
+---
+
+
+ 
+##  R & Vador<br/> 
+<sub_title1> Que <span style="color:red; ">{revealjs}</span> soit avec toi</sub_title1> <img src="../images/intro/intro_read.png"  id="img_intro">
+
+## Contexte 
+
+> * Le package <span style="color:#779cb7; ">{revealjs}</span> est basé sur <span style="color:red; ">reveal.js </span>, <br>
+> * <span style="color:red; ">reveal.js </span> est un framework HTML pour créer des présentations (comme celle-ci). <br>
+> * Les documents <span style="color:red;">RMarkdown</span> te permettent d'y ajouter du R
+
+## Qu'est-ce que RMarkdown?
+
+##
+Un type de fichier combinant du R et du Markdown <br> dans un document, il permet de générer:
+
+> * Des notebooks (comme dans Jupyter)
+> * Des articles de blog (même syntaxe que Notion)
+> * Des documents au format pdf, words, epub 
+> * Des dashboards, rapports et <span style="color:red;"> présentations </span>
+
+
+
+## Problématiques
+
+
+> * Pourquoi utiliser <span style="color:red; ">RMarkdown</span> pour faire des présentations alors que PowerPoint le fait très bien? 
+> * Comment réaliser une présentation avec <span style="color:#779cb7;  ">{revealjs}</span>?
+
+## 
+<span style="color:#bca480;">Pourquoi utiliser Rmarkdown pour faire des présentations alors que PowerPoint le fait très bien? </span>
+
+
+
+## Par rapport à PowerPoint
+<p style="margin-bottom:2em;"></p>
+<span style="color:blue; "> Avantage:</span>
+<div style="margin-bottom:1em;" class='multiCol fragment fade-up'>
+<div class='col'>Possibilité d'inclure du R</div>
+<div class='col'>Graphe/Tableaux interactifs </div>
+<div class='col'>Ajouter du dynamisme</div>
+</div>
+
+<span style="color:red;"> Inconvenient:  </span>
+<div class='multiCol fragment fade-up'>
+<div class='col'>fichier .Rmd</div>
+<div class='col'>Peut être long</div>
+<div class='col'>Rendu visuel</div>
+</div>
+
+
+## 
+<span style="color:#bca480;">Comment réaliser une présentation avec {revealjs}? </span>
+
+## Exemple : début du fichier
+
+
+```{r,  eval=FALSE}
+
+---
+title: "Vivre au printemps peu importe la saison"
+author: "Sieur Rosamont J. Kevin"
+date: "5/9/1838"
+output: 
+  revealjs::revealjs_presentation: 
+    theme: simple
+    highlight: haddock
+    center: true
+    transition: slide
+---
+      
+## Le titre du slide 1 
+le texte ici
+```{r} # début du code R 
+library(dplyr)
+
+data(starwars)
+summary(starwars)
+
+```   # fin du code R
+
+## Le titre du slide 2
+le texte
+etc...
+```
+
+
+
+## 
+Aide pour la syntaxe [R Markdown](https://rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf)
+
+## <span style="color:white;">Récapitulatif </span>{data-background=#7ac58c}
+
+
+
+## {data-background=#7ac58c}
+> * <span style="color:white;"> Présentation facile à faire (même principe que Jupyter)</span>
+> * <span style="color:white;"> Donne un apercu dynamique des résultats </span>
+> * <span style="color:white;"> Pratique pour les présentations courtes & techniques </span>
+
+
+
+## {data-background=#00bdf2} 
+<span style="color:white;">Merci pour votre attention </span>
+
+## <span style="color:white;">Questions? </span>{data-background=#00bdf2}
+
+
+<!--
+## <span style="color:white;"> </span>{data-background=#00bdf2}
+> * <span class="fragment fade-out" style="color:white;">Est-ce que dans notre environnement de travail, ça vaut la peine?</span> 
+> * <span style="color:white;">Ou trouver un exemple de présentation?</span>
+-->
+
+
+
+
+

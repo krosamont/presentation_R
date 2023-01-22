@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1590013632136.000,
+    "dirty" : true,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1463710402",
+    "id" : "EA39325A",
+    "lastKnownWriteTime" : 1589056419,
+    "last_content_update" : 1590013967070,
+    "path" : "~/Documents/dataScience/immo/add_data_wort.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "19,136",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

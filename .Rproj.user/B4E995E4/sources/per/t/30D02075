@@ -1,0 +1,33 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1592829984612.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "30D02075",
+    "lastKnownWriteTime" : 0,
+    "last_content_update" : 1592829984612,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "6F3FAD37",
+        "caption" : "sub_luxflat",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=sub_luxflat&cache_key=6F3FAD37",
+        "displayedObservations" : 133,
+        "environment" : "",
+        "expression" : "sub_luxflat",
+        "object" : "sub_luxflat",
+        "preview" : 0,
+        "totalObservations" : 133,
+        "variables" : 15
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 30,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

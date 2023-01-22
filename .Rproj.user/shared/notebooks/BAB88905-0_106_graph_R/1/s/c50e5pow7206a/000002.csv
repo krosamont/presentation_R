@@ -1,0 +1,35 @@
+"0","library(tidyverse)
+library(janitor)
+
+
+location <- read_csv('/Users/woza/Documents/dataScience/bdl_presentation/data/session6/ab_nyc2019.csv')
+
+sub_loc <- location %>% 
+  filter(!is.na(latitude) & !is.na(neighbourhood_group))
+
+# sub_loc %>% 
+#   group_by(neighbourhood_group) %>% 
+#   summarise(n_appart=n())
+
+sub_loc <- sub_loc %>%
+  # mutate(neighbourhood_group=ifelse(neighbourhood_group %in% c(""St. George"", ""Staten Island"", ""Bronx""), ""Autres*"", neighbourhood_group))
+  mutate(neighbourhood_group=ifelse(neighbourhood_group==""St. George"", ""Staten Island"", neighbourhood_group))
+  
+count_loc <- sub_loc %>% 
+  group_by(neighbourhood_group) %>% 
+  summarise(n_appart=n()) %>% 
+  ungroup() %>% 
+  arrange(desc(neighbourhood_group)) %>% 
+  mutate(pct = round(100*n_appart/sum(n_appart),1),
+         pct_label = cumsum(pct) - 0.5*pct,
+         n_label = ifelse(n_appart>4000, format(n_appart, digits=9, big.mark="" "", small.interval=3),""""),
+         nb_pct = paste0(neighbourhood_group, "" ("",pct,""%)""))
+"
+"2","Error: `...` is not empty.
+
+We detected these problematic arguments:
+* `relax`
+
+These dots only exist to allow future extensions and should be empty.
+Did you misspecify an argument?
+"

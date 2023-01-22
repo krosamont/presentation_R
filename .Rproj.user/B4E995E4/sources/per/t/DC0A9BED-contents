@@ -1,0 +1,174 @@
+---
+title: 
+author: 
+date: 
+output: 
+  revealjs::revealjs_presentation: 
+    theme: simple
+    highlight: haddock
+    center: true
+    transition: slide
+    css: style.css
+---
+
+ 
+## Data Science<br/> 
+<sub_title1> Import, Modify & Save</sub_title1> <img src="intro.png"  id="img_intro">
+
+## <span style="color:white;"> Séance Précendente </span>{data-background=#7ac58c}
+<br>
+
+> * <span style="color:white;"> `%>%` (pipe operator) </span>
+> * <span style="color:white;"> select()  </span>
+> * <span style="color:white;"> filter()  </span>
+> * <span style="color:white;"> summarise() </span>
+> * <span style="color:white;"> group_by()  </span>
+> * <span style="color:white;"> mutate()  </span>
+> * <span style="color:white;"> inner_join()  </span>
+
+
+## Quel type de données peut-on importer?
+
+<!--<span class="fragment fade-in"> On peut importer tous type de données dans R </span> -->
+
+> * .txt, .csv, .xlsx (classique)
+> * Base de données (ORACLE, Microsoft Server, etc)
+> * Images, format audio ou autre (non-structuré)
+
+
+## Comment importer des données?
+
+```{r,  warning=FALSE, message=FALSE, eval=FALSE}
+library(readr)
+library(readxl)
+
+df_csv <- read_csv('~path')
+df_xls <- read_xls('~path')
+```
+
+
+## Apercu du Fichier
+Graphique simple
+```{r,  warning=FALSE, message=FALSE, echo=FALSE}
+library(dplyr)
+library(tidyr)
+library(lubridate)
+
+
+gest<- c('Karl Marx', 'Joseph Schumpeter', 'John Keynes', 'Milton Firedman', 'Adam Smith', 'Joseph Stigliz','Friedrich Hayek',
+         'David Ricardo', 'Thomas Malthus', 'Jean-Baptiste Say', 'Alfred Marshall', 'Paul Samuelson','Irving Fisher', 
+         'Raghuram Rajan', 'Hyman Minsky', 'Amartya Sen', 'Andrew Lo', 'John Forbes Nash')
+
+set.seed(23)
+
+n <- 5000
+date <- sample(seq(as.Date('2019/01/01'), as.Date('2019/12/31'), by="day"), n, replace = TRUE)
+gest <- sample(gest ,n, replace = TRUE)
+rev <- abs(rweibull(n, 1, 10^4) - rweibull(n, 1, 10^4)*runif(n,-1,1))*runif(n,0.8,1.5)/abs(rnorm(n,4,1))
+
+df_rev <- tibble(gest,date, rev)
+```
+
+```{r,  warning=FALSE, message=FALSE}
+ 
+head(df_rev)
+
+```
+
+## <span style="color:white;"> Modification à Effectuer</span>{data-background=#bca480}
+<span style="color:white; font-size: smaller;"> 
+Afficher la somme des revenus par gestionnaire et par trimestre. <br>
+Ajouter une colonnes des revenus générés par pourcentage.
+</span>
+
+
+
+## Solution proposée
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
+ df_rev2_quarter <- df_rev %>% 
+  mutate(quarter = paste0('Q',quarter(date), '-', year(date))) %>% 
+  group_by(gest, quarter) %>% 
+  summarise(rev=sum(rev)) %>% 
+  ungroup() 
+
+
+df_rev2_total <- df_rev %>% 
+  mutate(quarter = lubridate::year(date)) %>% 
+  group_by(gest, quarter) %>% 
+  summarise(rev=sum(rev)) %>% 
+  ungroup() 
+  
+df_rev2 <- df_rev2_total %>% 
+  rbind(df_rev2_quarter)
+```
+
+
+## pivot_wide()
+<img  height="200" class='tidyverse_image2' src="image/tidyverse/pivot_wide.png">
+```{r}
+# Pour les opérations groupées
+df_rev_wid <- pivot_wider(df_rev2, names_from = quarter, values_from = rev) %>% 
+  head(5)
+```
+
+
+## pivot_long()
+<img  height="200" class='tidyverse_image2' src="image/tidyverse/pivot_long.png">
+```{r}
+# Pour les opérations de groupe, min, max, mean, median, quantile
+df_rev_lon <- pivot_longer(df_rev_wid,-gest, names_to='period', values_to='rev') %>% 
+  head(5)
+```
+
+## Sauvegarde du dataset modifié
+```{r, eval=FALSE}
+# Pour les opérations de groupe, min, max, mean, median, quantile
+write_csv(df_rev_wid,'~path')
+
+```
+
+## <span style="color:white;">Récapitulatif </span>{data-background=#7ac58c}
+<!--<img src="transition1.png"  id="img_transition"> -->
+
+
+
+## {data-background=#7ac58c}
+<br>
+
+> * <span style="color:white;"> `df <- read_csv('~path')` </span>
+> * <span style="color:white;"> `df2 <- df %>% dplyr::function()`  </span>
+> * <span style="color:white; ">`write_csv(df2, '~path2')`  </span>
+
+
+
+## {data-background=#00bdf2} 
+<span style="color:white;">Merci pour votre attention </span>
+
+## <span style="color:white;">Questions? </span>{data-background=#00bdf2}
+
+
+## <span style="color:white;">Contact</span> {data-background=#00bdf2}
+[Kevin Rosamont Prombo](kevinrosamont@ymail.com)
+
+
+
+<!--## Notions importantes
+
+> * Les données
+> * Les fonctions
+> * Les objets déclarés
+
+
+<span class="fragment fade-in" style="color:#bca480;"> Les données se présentent sous forme de tableau </span>
+
+
+## 
+aide pour la syntaxe [R Markdown](https://rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf)
+-->
+
+
+
+
+
+
+

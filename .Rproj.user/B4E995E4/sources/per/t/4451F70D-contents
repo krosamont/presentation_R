@@ -1,0 +1,460 @@
+library(dplyr)
+library(tidyr)
+
+gest<- c('Karl Marx', 'Joseph Schumpeter', 'John Keynes', 'Milton Firedman', 'Adam Smith', 'Joseph Stigliz','Friedrich Hayek',
+         'David Ricardo', 'Thomas Malthus', 'Jean-Baptiste Say', 'Alfred Marshall', 'Paul Samuelson','Irving Fisher', 
+         'Raghuram Rajan', 'Hyman Minsky', 'Amartya Sen', 'Andrew Lo', 'John Forbes Nash')
+
+set.seed(23)
+
+n <- 5000
+date <- sample(seq(as.Date('2019/01/01'), as.Date('2019/12/31'), by="day"), n, replace = TRUE)
+gest <- sample(gest ,n, replace = TRUE)
+rev <- abs(rweibull(n, 1, 10^4) - rweibull(n, 1, 10^4)*runif(n,-1,1))*runif(n,0.8,1.5)/abs(rnorm(n,4,1))
+
+df_rev <- tibble(gest,date, rev)
+
+df_rev2_quarter <- df_rev %>% 
+  mutate(quarter = paste0('Q',lubridate::quarter(date), '-', lubridate::year(date))) %>% 
+  group_by(gest, quarter) %>% 
+  summarise(rev=sum(rev)) %>% 
+  ungroup() 
+
+
+df_rev2_total <- df_rev %>% 
+  mutate(quarter = lubridate::year(date)) %>% 
+  group_by(gest, quarter) %>% 
+  summarise(rev=sum(rev)) %>% 
+  ungroup() 
+  
+df_rev2 <- df_rev2_total %>% 
+  rbind(df_rev2_quarter)
+
+df_rev2 <- pivot_wider(df_rev2, names_from = quarter, values_from = rev) #%>% 
+  #mutate(total= `Q1-2019` +`Q2-2019` +`Q3-2019` +`Q4-2019`)
+
+pivot_longer(df_rev2,-gest, names_to='period', values_to='rev')
+
+
+library(visNetwork)
+
+
+path_to_images <- '/Users/woza/Documents/dataScience/bdl_presentation/image/awesomeFont/'
+nodes <- data.frame(id = 0:6, 
+                    group = LETTERS[seq(1: 7)],
+                    # shape = rep("circularImage", 5),
+                    # image = paste0(path_to_images, c('file-import', 'magic', 'chart-pie', 'flask', 'bullhorn'), ".svg"),
+                    label=c('Problem', 'Import', 'Transform', 'Visualize', 'Model', 'Communicate', 'Diffusion'))
+edges <- data.frame(from = c(0,1,2,3,4,3,5), to = c(1,2,3,4,5,6,2))
+
+visNetwork(nodes, edges, width = "100%") %>% 
+  visEdges(arrows =list(to = list(enabled = TRUE, scaleFactor = 2))) %>% 
+  visGroups(groupname = "A", shape = "icon", 
+            icon = list(code = "f0eb" , color = "orange"
+            )) %>%
+  visGroups(groupname = "B", shape = "icon", 
+            icon = list(code = "f1c0" , color = "grey"
+                        )) %>%
+  visGroups(groupname = "C", shape = "icon", 
+            icon = list(code = "f0d0" , color = "#175186"
+            )) %>%
+  visGroups(groupname = "D", shape = "icon", 
+            icon = list(code = "f200" , color = "#175186"
+            )) %>%
+  visGroups(groupname = "E", shape = "icon", 
+            icon = list(code = "f1b3", color = "#175186"
+            )) %>%
+  visGroups(groupname = "F", shape = "icon", 
+            icon = list(code = "f086", color = "#175186"
+            ))%>%
+  visGroups(groupname = "G", shape = "icon", 
+            icon = list(code = "f09e", color = "#bca480"
+            )) %>%
+  addFontAwesome()
+
+n <- 160000
+profession <- c("CFO", "CTO", "CEO", "Cadre de la fonction publique", "Professeur", 
+                "Ingénieur ou cadre technique d'entreprise", "Avocat", "Medecin", 
+                "Artiste", "Retraité", "Rentier", "Héritier", "Partner", "Non Renseigné",
+                "Architecte", "Politicien", "Sportif de Haut Niveau", "Juge", "Commercial",
+                "Fermier", "Joilier", "Agent immobilier", "Antiquaire", "Journaliste", "Publicitaire",
+                "Galeriste", "Marchand d'art", "Autre - A préciser", "Freelance"
+                )
+national <- c("Luxembourg", "France", "Belgique","Allemagne", "Angleterre", "Pays-Bas", "Italie", "Portugal", "Espagne",
+              "Russie", "Ukraine", "Moldavie", "Serbie", "Albanie", "Kazakhstan", "Azerbaidjan", "Georgie",
+              "USA", "Canada", "Colombie", "Venezuela", "Argentine", "Bresil", "Belize", "Jamaique", "Japon",
+              "Chine", "Coree du Sud", "Vietnam", "Cambodge", "Australie", "Nouvelle-Zelande", "Haitie",
+              "Maroc", "Lybie", "Algerie", "Egypte", "Senegal", "Cameroun", "Code d'Ivoire", "Ghana", "Nigeria",
+              "Zambie", "Afrique du Sud", "Ethiopie", "Congo", "Tunisie", "Rwanda", "Tanzanie")
+
+core_target <- c("Luxembourg", "France", "Belgique","Allemagne", "Pays-Bas", "Italie", "Portugal", "Espagne")
+core_profession <- c("CFO", "CTO", "CEO", "Cadre de la fonction publique", "Professeur", 
+                "Ingénieur ou cadre technique d'entreprise", "Avocat", "Medecin", 
+                "Artiste", "Retraité", "Rentier", "Héritier", "Partner", 
+                "Architecte", "Politicien", "Sportif de Haut Niveau", "Juge", 
+                "Fermier", "Joilier", "Agent immobilier", "Antiquaire", "Journaliste", "Publicitaire",
+                "Galeriste", "Marchand d'art" )
+young_profession <- c( "CEO", "Artiste", "Héritier", "Sportif de Haut Niveau", "Autre")
+prof <- sample(profession, n, replace = TRUE)
+nat <- c(rep("Luxembourg", 40000),rep("France", 25000),rep("Belgique", 35000),rep("Allemagne", 20000),
+         rep("Italie", 12000),rep("Portugal", 8000), sample(national ,20000, replace = TRUE))
+
+res <- c(rep("Luxembourg", 120000),rep("France", 8000),rep("Belgique", 2000),rep("Allemagne", 10000),
+         rep("Italie", 5000),rep("Portugal", 5000), sample(national ,10000, replace = TRUE))
+
+date <- sample(seq(as.Date('2000/01/01'), as.Date('2019/12/31'), by="day"), n, replace = TRUE)
+
+apport <- abs(rnorm(n,3000000,10000000)) #abs(rweibull(n, 1, 10^5) - rweibull(n, 1, 10^4)*runif(n,-1,1))*runif(n,0.8,1.5)/abs(rnorm(n,4,1))
+
+
+set.seed(23)
+
+dossier <- tibble(date, residence=res, nationalite=nat, profession= prof, apport) %>% 
+  mutate(apport=ifelse(apport <50000, apport*100, apport),
+         age = round(abs(rnorm(n, 57, 10)),0),
+         age= ifelse(age<23, round(abs(rnorm(1, 57, 10)),0), age),
+         apport2 = rnorm(n, 500000, 300000),
+         apport3 = rnorm(n, 95000000, 9000000),
+         apport4 = rnorm(n, 5000000, 3000000),
+         pct3 = runif(n),
+         pct2 = runif(n),
+         pct1 = runif(n),
+         pct = runif(n),
+         apport = ifelse(pct3<0.5 & age<65, 3000.30*age+2300*as.numeric(date)+ apport2, 
+                         ifelse(pct3>0.8 & age<65, apport3*age/10+apport4, apport)),
+         sexe = ifelse(pct2>0.58,"F","M"),
+         profession = case_when(
+           age<55 & profession=="Retraité" ~ sample(core_profession[core_profession!="Retraité"], 1, replace = TRUE) ,
+           age<30 & !profession %in% young_profession & pct1< 0.3 ~ sample(young_profession, 1, replace = TRUE),
+           age<30 & !profession %in% young_profession & pct1< 0.6 ~ sample(young_profession, 1, replace = TRUE),
+           age<30 & !profession %in% young_profession & pct1> 0.6  ~ sample(young_profession, 1, replace = TRUE),
+           age<32 & profession=="Héritier" & pct1> 0.9 ~ "Autre",
+           age<32 & profession=="Héritier" & pct1> 0.4 ~ "Sportif de Haut Niveau",
+           age>75  ~ "Retraité",
+         TRUE ~ profession),
+         acceptance = case_when(
+           profession %in% core_profession & res %in% core_target  ~ 1,
+           date> as.Date('2015/01/01') & pct> 0.3 & !res %in% core_target ~ 1,
+           res %in% core_target & pct> 0.8 ~ 1,
+           date< as.Date('2009/01/01') & pct> 0.8 ~ 1,
+           date< as.Date('2013/01/01') & pct> 0.7 ~ 1,
+           date< as.Date('2013/01/01') & pct> 0.65 ~ 1,
+           date< as.Date('2015/01/01') & pct> 0.6 ~ 1,
+           TRUE ~ 0
+         )) %>% 
+  select(date, residence, nationalite,profession, age, apport, sexe, acceptance) %>% 
+  filter(residence %in% c("Luxembourg", "France", "Belgique","Allemagne"))
+
+library(ggplot2) 
+library(readr)
+library(dplyr)
+library(tidyr)
+library(readxl)
+library(janitor)
+library(stringr)
+library(magrittr)
+stocks <- read_xlsx('/Users/woza/Documents/dataScience/bdl_presentation/data/stocks.xlsx', sheet = 2, skip = 3)
+
+
+stocks_long <- stocks %>% 
+  rename(stocks=date) %>% 
+  pivot_longer(-stocks, names_to = 'date', values_to = 'val') %>% 
+  mutate(date=as.Date(as.numeric(date), origin = "1899-12-30"),
+         val=as.numeric(val)) %>% 
+  filter(date >as.Date('2013-01-01')) %>% 
+  group_by(stocks) %>% 
+  mutate(indice= 100*val/first(val))
+
+ggplot(data=stocks_long %>% filter(stocks=='AEMD US  EQUITY'))+
+  geom_line(aes(x=date, y=indice, color=stocks))
+
+ggplot(data=stocks_long %>% filter(stocks=='AEMD US  EQUITY'))+
+  geom_line(aes(x=date, y=indice, color=stocks))+
+  ggtitle("Evolution du cours d'Aethlon Medical Inc \n à la bourse entre 2013 et 2018") +
+  xlab("Date") +
+  ylab("Valeur ($)") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 14, colour = "#717171", face = "bold", hjust = 0.5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        axis.title.x = element_text(colour = "#717171"),
+        axis.title.y = element_text(colour = "#717171"),
+        legend.position="none")
+
+athome <- read_rds('/Users/woza/Documents/dataScience/bdl_presentation/data/tbl_atHome_backup2020_06_03.rds')
+
+txhousing <- athome %>%
+  filter(type_bien=='appartement' & ville=='Luxembourg' & type_annonce=='location' &!is.na(prix) & !is.na(quartier)) %>% 
+  select(img, link, prix, surface, quartier, charges_mensuelles, balcon, terrasse, chambres, etage, jardin, cave, buanderie, grenier, meuble) 
+
+luxflat <- read_rds('/Users/woza/Documents/dataScience/bdl_presentation/data/luxflat.rds')
+
+sub_luxflat <- luxflat %>% 
+  filter(quartier %in% c('Beggen', 'Belair',  'Gasperich','Kirchberg') & meuble==0) 
+
+hchart(sub_luxflat, type='scatter', hcaes(x=surface, y=prix, group=quartier)) %>% 
+  hc_title( text="Loyer d'appartements en Ville<br>par rapport à la surface au 1er Juin 2020") %>%
+  hc_tooltip(pointFormat = " Surface: <b>{point.x} m²</b> <br/>
+             Prix: <b>{point.x} €</b>") %>% 
+  hc_xAxis(title = list(text = "Surface")) %>% 
+  hc_yAxis(title = list(text = "Loyer")) %>% 
+  hc_caption(
+    text = "*Le loyer comprend les charges mensuelles",
+    align = "right"
+  ) %>% 
+  hc_credits(
+    enabled = TRUE, text = "Source: atHome <br/>*Le loyer comprend les charges mensuelles",
+    href = "https://www.athome.lu/srp/?tr=rent&q=119ebefe,dea70e87,0258f3cd,f37c45a0&loc=L10-beggen,L10-kirchberg,L10-gasperich,L10-belair",
+    style = list(fontSize = "12px")
+  )
+
+ggplot(data=txhousing)+
+  geom_point(aes(x=surface, y=prix, color=quartier), position = 'jitter')
+
+
+athome <- read_rds('/Users/woza/Documents/dataScience/bdl_presentation/data/tbl_atHome_backup2020_06_03.rds')
+
+txhousing <- athome %>%
+  filter(type_bien=='appartement' & ville=='Luxembourg' & type_annonce=='location' &!is.na(prix)) %>% 
+  select(id, prix, surface, quartier) 
+
+
+
+ggplot(data=txhousing %>% filter(quartier %in% c('Beggen', 'Belair',  'Gasperich','Kirchberg')))+ #'Merl', 'Gare',
+  geom_point(aes(x=surface, y=prix, color=quartier), position = 'jitter') +
+  geom_smooth(aes(x=surface, y=prix, color=quartier), se=FALSE, method = "lm")
+
+stocks_cat <- read_xlsx('/Users/woza/Documents/dataScience/bdl_presentation/data/stocks.xlsx', sheet = 3)
+colnames(stocks_cat)
+stocks_cat %<>% 
+  select(TICKER, GICS_SECTOR_NAME, CURRENCY, COUNTRY_OF_LARGEST_REVENUE) %>% 
+  clean_names
+
+colnames(stocks_cat)
+
+stocks_long2 <- stocks_long %>% 
+  inner_join(stocks_cat, by=c('stocks'='ticker'))
+
+stocks_long2 %>% 
+  group_by(gics_sector_name) %>% 
+  summarise(n_stocks = n_distinct(stocks))
+
+stocks_long2 %<>% 
+  mutate(new_stocks = str_trim(str_sub(stocks,start=1,end=-7)),
+         new_stocks = factor(new_stocks, levels=c("7267 JP", "EM IM", "HUSQB SS", "TSCO US",
+                                                  "AEMD US",  "BRKR US", "CPHD US", "FLDM US",
+                                                  "AGCO US", "CARR IM", "DE US", "TTC US"
+                                                  )),
+         new_size= ifelse(new_stocks %in% c("EM IM", "BRKR US", "AGCO US"),3,1),
+         font = ifelse(new_stocks %in% c("EM IM", "BRKR US", "AGCO US"), "bold", "plain")) 
+
+stocks_long2 %>% 
+  select(gics_sector_name, new_stocks) %>% 
+  distinct()
+
+
+ggplot(data=stocks_long2)+
+  geom_line(aes(x=date, y=indice, color=new_stocks, size= new_size)) +
+  scale_size_continuous(range = c(0.5,0.75))+
+  geom_text(data=stocks_long2 %>% filter(date==max(date)) %>%
+                                           mutate(indice= case_when(
+                                             new_stocks %in% c('FLDM US', 'DE US') ~ indice+20,
+                                             new_stocks %in% c('EM IM', 'BRKR US') ~ indice+40,
+                                             new_stocks %in% c('AEMD US', 'AGCO US', 'CPHD US') ~ indice-20,
+                                             TRUE ~ indice)) ,
+            aes(x=date+0.5,y=indice, label=new_stocks, fontface = font, color=new_stocks, hjust = -.03), 
+            size= 2
+            #check_overlap = TRUE
+            ) +
+  # scale_size_continuous(range=c(2, 3), guide="none") +
+   expand_limits(x = c(min(stocks_long2$date), lubridate::ymd("2019-01-01")))+
+  scale_color_manual(values=c('#b2b4b7', '#6891d0', '#b2b4b7', '#b2b4b7', 
+                              '#b2b4b7', '#6891d0', '#b2b4b7', '#b2b4b7', 
+                              '#6891d0', '#b2b4b7', '#b2b4b7', '#b2b4b7'))+
+  theme_minimal() +
+  theme(#plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
+        panel.grid.minor = element_blank(),
+        legend.position="none"
+  ) +
+  facet_wrap(~gics_sector_name, nrow = 3)
+
+?geom_text
+library(highcharter)
+
+hchart(stocks_long2, "line", hcaes(x = date, y = indice, group = stocks)) %>% 
+  hc_title(text = "Random Chart")
+
+stocks_long2 %<>% 
+  mutate(new_name= paste0(str_sub(stocks,start=1, end=-7),'(',gics_sector_name, ')'))
+
+hchart(stocks_long2, "line", hcaes(x = date, y = indice, group = new_name)) %>% 
+  hc_title(text = "Random Chart")
+
+
+fish <- read_csv2("/Users/woza/Documents/dataScience/bdl_presentation/data/catch_data_2010_2017.csv")
+label <- read_csv2("/Users/woza/Documents/dataScience/bdl_presentation/data/fish_ca_label.csv")
+country <- read_csv2("/Users/woza/Documents/dataScience/bdl_presentation/data/country_label.csv") %>%
+  purrr::map_df(as.character)
+label <- label %>%
+  mutate(Species = stringr::str_sub(SPECIES,1,3), SPECIES = stringr::str_sub(SPECIES,6)) %>%
+  rename(label = SPECIES) 
+
+fish2 <- read_csv("/Users/woza/Documents/dataScience/bdl_presentation/data/session5/fish_ca_data.csv")
+
+fish22 <- fish2 %>%
+  clean_names() %>% 
+  filter(value!=':' & time<2019) %>% 
+  mutate(value=as.numeric(str_remove_all(value,'[[:space:]]')),
+         geo = ifelse(str_detect(geo,'Germany'),'Germany', geo)) %>% 
+  select(-flag_and_footnotes)
+
+#En tonnes de poissons vivants
+fish <- fish %>%
+  left_join(label) %>%
+  mutate(
+    label = trimws(gsub('\\"','', label)),
+    region = gsub("_",".", as.character(Region)),
+    `Obs Value` = as.numeric(`Obs Value`)
+  ) %>%
+  filter(!grepl( "NK", Region) &!is.na(label) ) %>%
+  rename(value=`Obs Value`) %>%
+  left_join(country) %>%
+  select(-`Obs Status`, -`Obs Conf`,-Country2) %>% 
+  filter(region=='0' & Species %in% c('F00', 'F01', 'F04', 'F35', 'F32'))
+
+
+selected_cntry <- fish22 %>% 
+  filter(geo %in% c('Cyprus', 'Iceland', 'Turkey','European Union (current composition)', 'Norway')) %>% 
+  group_by(Country) %>% 
+  summarise(n=sum(value)) %>% 
+  filter(!is.na(n)) %>% 
+  slice_max(n, n=3) %>% 
+  .$Country
+
+neighbors <- c('Iceland', 'Sweden', 'Finland', 'Norway', 'Denmark')
+big_country <- c('France', 'United Kingdom', 'Spain', 'Denmark', 'Netherlands')
+
+fish_global <- fish22 %>% 
+  filter(geo %in% c(neighbors, big_country))
+
+
+ggplot(fish22 %>% filter(geo=='Norway' & time<=2016)) + 
+  geom_bar(aes(x=time, y=value/10^6, fill=geo), stat="identity", position=position_dodge())+
+  ggtitle("Evolution du volume de la pêche\nen Norvège entre 2000 et 2016") +
+  ylab("Poids* (millions de tonnes)") +
+  xlab("Année") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        legend.position = 'none')+
+  expand_limits(y = c(0,3))
+
+ggplot(fish_global %>% filter(time>2014)) + 
+  geom_bar(aes(x=time, y=value, fill=geo), stat="identity")
+
+fish_pct <- fish22 %>% 
+  filter( (geo %in%  big_country|str_detect(geo, '28')) & time==2015) %>% 
+  mutate(pct = value/max(value)) 
+
+max_val <- max(fish_pct$value)
+fish_pct %<>% 
+  filter(!str_detect(geo, '28')) %>% 
+  add_row(time= 2015, geo='Others', value=max_val-sum(.$value), pct = 1- sum(.$pct)) %>% 
+  mutate(geo= factor(geo, levels=c('Denmark', 'France', 'Netherlands', 'Spain', 'United Kingdom', 'Others'))) %>% 
+  arrange(desc(geo)) %>% 
+  mutate(y_pos= cumsum(pct)- 0.5*pct)
+
+
+ggplot(fish_pct, aes(x="", y=pct, fill=geo)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)
+
+ggplot(fish_pct, aes(x="", y=pct, fill=geo)) +
+  geom_bar(stat="identity", width=1, color="white") +
+  geom_text(aes(y = y_pos, label = paste0(round(pct*100, 2),' %') ), color = "white", size=4) +
+  coord_polar("y", start=0) +
+  theme_void() 
+  
+hchart(fish_pct, "pie", hcaes(name = geo, y = pct), name='pct peche en EU28')
+
+hc_add_series(fish_pct, "pie", hcaes(name = geo, y = pct), name = "Bars") %>%
+  
+  
+  # geom_text(aes(y = pct/2 + c(0, cumsum(pct)[-length(pct)]), 
+                # label = round(pct*100, 2)), size=5)
+
+c('Cyprus', 'Iceland', 'Turkey', 'European Union (current composition)', 'Norway')
+gdp <- read_csv('/Users/woza/Documents/dataScience/bdl_presentation/data/gdp_data.csv')
+
+gdp <- clean_names(gdp)
+
+gdp2 <- gdp %>% 
+  filter(country_name %in% c("Luxembourg", "France", "Portugal", "Spain", "Netherland", 
+                             "Italy", "Germany", "Belgium", "Switzerland", "Singapore",
+                             "Canada", "United States", "United Kingdom") &
+           series_code=='NY.GDP.PCAP.PP.CD') %>% 
+  select(country_name, starts_with("x199"), starts_with("x20"))%>% 
+  pivot_longer(-country_name, names_to="year", values_to = "gdp") %>% # GDP_per_capita_PPP
+  mutate(year= as.numeric(str_sub(year, start=-4, end=-1))) %>% 
+  filter(year!=2019) %>% 
+  mutate(gdp = as.numeric(gdp))
+
+
+ggplot(data=gdp2 %>% filter(country_name %in% c("Belgium", "France", "Luxembourg", "Germany", "Switzerland", "Singapore"))) +
+  geom_line( mapping = aes(x=year, y=gdp, color=country_name))
+
+
+ggplot(data=dossier %>% filter(profession=="Sportif de Haut Niveau")) +
+  geom_point( mapping = aes(x=date, y=apport))
+  geom_bar(mapping = aes(x=apport))
+
+as.numeric(as.factor(prof))
+
+
+?slice
+
+
+
+meuble_quartier <- luxflat %>% 
+  filter(meuble==1) %>% 
+  group_by(quartier) %>% 
+  summarise(n_appart=n()) %>% 
+  ungroup() %>% 
+  arrange(desc(n_appart)) %>% 
+  slice(1:3)
+
+
+luxflat %>% 
+  filter(meuble==1) %>% 
+  group_by(quartier) %>% 
+  summarise(n_appart=n()) %>% 
+  ungroup() %>% 
+  arrange(n_appart) %>% 
+  slice(1:3)
+  
+luxflat %>% 
+  group_by(quartier) %>% 
+  summarise(prix_max = max(prix), prix_min = min(prix),
+            prix_med = median(prix), surf_max = max(surface), 
+            surf_min = min(surface), surf_med = median(surface) )
+
+
+ggplot(data=luxflat %>% 
+         filter(quartier %in% meuble_quartier$quartier) %>% 
+         mutate(meuble= ifelse(meuble==1, 'Appartements meublés','Appartements non meublés'))) + #'Merl', 'Gare',
+  geom_point(aes(x=surface, y=prix, color=quartier), alpha=0.8, position = 'jitter') +
+  facet_wrap(~meuble, nrow = 2) +
+  # geom_point(data=sub_luxflat %>% filter(quartier %in% 'Kirchberg'), aes(x=surface, y=prix, color=quartier), alpha=0.8, position = 'jitter') +
+  # gghighlight(quartier %in% 'Belair' & surface<80)+
+  ggtitle("Loyer d'appartements en Ville par\n rapport à la surface au 1er Juin 2020")  +
+  xlab("Surface (m²)") +
+  ylab("Loyer* (€)") +
+  theme_light()+
+  theme(plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
+        plot.caption = element_text(size = 8, face = "bold",color='#cecece'),
+        #panel.grid.minor = element_blank(),
+        legend.position= 'bottom')+
+  labs(color = " ",
+       caption = "Source: atHome \n*Le loyer comprend les charges mensuelles")
+        #axis.line = element_line(color="grey", size = 0.5)) 

@@ -1,0 +1,408 @@
+---
+title: 
+author: 
+date: 
+output: 
+  revealjs::revealjs_presentation: 
+    theme: simple
+    highlight: haddock
+    center: true
+    transition: slide
+    css: style.css
+---
+
+
+## Data Science<br/> 
+<sub_title1>Visualization: Scatter Plot </sub_title1> <img src="intro.png"  id="img_intro">
+
+## <span style="color:white;"> Séance Précendente </span>{data-background=#7ac58c}
+<br>
+
+> * <span style="color:white;"> Line chart : </span>
+> * <span style="color:white;"> &ensp; 2 variables continues</span>
+> * <span style="color:white;"> &ensp; Beaucoup de donnée sur l'axe horizontal</span>
+> * <span style="color:white;"> Code : </span>
+> * <span style="color:white;"> &ensp; `ggplot()+geom_line(DATA, aes(X,Y))` (Normal) </span>
+> * <span style="color:white;"> &ensp; `hchart(DATA,'line',hcaes(X,Y))` (Interactif) </span>
+
+
+## Type de graphiques
+<img height="350" align="center"  src="image/graph_descriptions.png"/> 
+
+<!--
+## <span style="color:black;">Scatter Plot </span>{data-background=#eaf3f9}
+-->
+
+## Scatter plot
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+luxflat <- read_rds('/Users/woza/Documents/dataScience/bdl_presentation/data/session4/luxflat.rds')
+
+ggplot(data=luxflat %>% rename(Quartiers=quartier))+
+  geom_point(aes(x=surface, y=prix), position = 'jitter')+
+  ggtitle("Loyer d'appartements en Ville par\n rapport à la surface au 1er Juin 2020") +
+  xlab("Surface (m²)") +
+  ylab("Loyer (€)") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
+        panel.grid.minor = element_blank()) +
+  expand_limits(x = 0, y = 0)
+
+
+
+# ggplot(data=txhousing %>% filter(quartier %in% c('Beggen', 'Belair',  'Gasperich','Kirchberg')))+ #'Merl', 'Gare',
+#   geom_point(aes(x=surface, y=prix, color=quartier), position = 'jitter') +
+#   geom_smooth(aes(x=surface, y=prix, color=quartier), se=FALSE, method = "lm")
+```
+
+## Code Scatter Plot 
+```{r, eval=FALSE, warning=FALSE, message=FALSE}
+library(ggplot)
+ggplot(data= YOUR_DATASET)+
+  
+  #geom_line(aes(x= X_AXIS_VAR, y= Y_AXIS_VAR, color= COLOR_VAR)) +
+  geom_point(aes(x= X_AXIS_VAR, y= Y_AXIS_VAR, color= COLOR_VAR)) +
+
+  ggtitle("YOUR TITLE")+ # The Graph title
+  xlab("YOUR X LABEL") + # If you want something different 
+  ylab("YOUR Y LABEL") + # from X_AXIS_VAR & Y_AXIS_VAR
+  
+  theme_minimal() +      # Optional
+  theme(plot.title = element_text(size = 15,  hjust = 0.5), # Optional
+        panel.grid.minor = element_blank(), # Optional
+        panel.grid.major.x = element_blank(), # Optional
+        )
+```
+
+## <span style="color:white;">Instructions</span>{data-background=#bca480}
+> * <span style="color:white;"> Lire le fichier `luxflat.rds` </span>
+> * <span style="color:white;"> Format adéquate pour faire un graphe </span>
+> * <span style="color:white;"> Faire un graphe en selectionant 4 quartiers maximum </span>
+> * <span style="color:white;"> _Pimp your graph_ </span>
+
+
+
+## Solution Proposée
+```{r, eval=FALSE, warning=FALSE, message=FALSE}
+
+luxflat <- read_rds('/data/luxflat.rds')
+
+sub_luxflat <- luxflat %>% 
+  filter(quartier %in% c('Beggen', 'Belair',  'Gasperich','Kirchberg') & meuble==0) 
+
+ggplot(data=sub_luxflat) + 
+  geom_point(aes(x=surface, y=prix, color=quartier)) +
+  ggtitle("Loyer d'appartements en Ville par\n rapport à la surface au 1er Juin 2020") +
+  labs(fill = "Quartiers") +
+  xlab("Surface (m²)") +
+  ylab("Loyer (€)") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
+        panel.grid.minor = element_blank(),
+        legend.justification=c(1,0), 
+        legend.position=c(0.95,0.02)) 
+
+```
+
+## Rendu Visuel{data-transition="none"}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
+luxflat <- read_rds('/Users/woza/Documents/dataScience/bdl_presentation/data/session4/luxflat.rds')
+
+sub_luxflat <- luxflat %>% 
+  filter(quartier %in% c('Beggen', 'Belair',  'Gasperich','Kirchberg') & meuble==0)
+
+ggplot(data=sub_luxflat) + #'Merl', 'Gare',
+  geom_point(aes(x=surface, y=prix, color=quartier), position = 'jitter') +
+  ggtitle("Loyer d'appartements en Ville par\n rapport à la surface au 1er Juin 2020") +
+    labs(fill = "Quartiers",
+       caption = "Source: atHome \n*Le loyer comprend les charges mensuelles") +
+  xlab("Surface (m²)") +
+  ylab("Loyer* (€)") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
+        plot.caption = element_text(size = 8, face = "bold",color='#cecece'),
+        panel.grid.minor = element_blank(),
+        legend.justification=c(1,0), 
+        legend.position=c(0.95,0.02)) 
+
+```
+
+
+
+
+## Rendu Visuel{data-transition="none"}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
+ggplot(data=sub_luxflat) + #'Merl', 'Gare',
+  geom_point(aes(x=surface, y=prix, color=quartier), alpha=0.2, position = 'jitter') +
+  geom_point(data=sub_luxflat %>% filter(quartier %in% 'Gasperich' & surface<80), aes(x=surface, y=prix, color=quartier), alpha=0.8, position = 'jitter') +
+  # gghighlight(quartier %in% 'Belair' & surface<80)+
+  ggtitle("Loyer d'appartements en Ville par\n rapport à la surface au 1er Juin 2020") +
+  labs(fill = "Quartiers",
+       caption = "Source: atHome \n*Le loyer comprend les charges mensuelles") +
+  xlab("Surface (m²)") +
+  ylab("Loyer* (€)") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
+        plot.caption = element_text(size = 8, face = "bold",color='#cecece'),
+        panel.grid.minor = element_blank(),
+        legend.justification=c(1,0), 
+        legend.position=c(0.95,0.02)) 
+
+```
+
+
+## Rendu Visuel{data-transition="none"}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
+ggplot(data=sub_luxflat) + #'Merl', 'Gare',
+  geom_point(aes(x=surface, y=prix, color=quartier), alpha=0.2, position = 'jitter') +
+  geom_point(data=sub_luxflat %>% filter(quartier %in% 'Belair' & surface>100), aes(x=surface, y=prix, color=quartier), alpha=0.8, position = 'jitter') +
+  # gghighlight(quartier %in% 'Belair' & surface<80)+
+  ggtitle("Loyer d'appartements en Ville par\n rapport à la surface au 1er Juin 2020") +
+  labs(fill = "Quartiers",
+       caption = "Source: atHome \n*Le loyer comprend les charges mensuelles") +
+  xlab("Surface (m²)") +
+  ylab("Loyer* (€)") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
+        plot.caption = element_text(size = 8, face = "bold",color='#cecece'),
+        panel.grid.minor = element_blank(),
+        legend.justification=c(1,0), 
+        legend.position=c(0.95,0.02)) 
+
+```
+
+
+## Rendu Visuel{data-transition="none"}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
+ggplot(data=sub_luxflat) + #'Merl', 'Gare',
+  geom_point(aes(x=surface, y=prix, color=quartier), alpha=0.2, position = 'jitter') +
+  geom_point(data=sub_luxflat %>% filter(quartier %in% 'Beggen'), aes(x=surface, y=prix, color=quartier), alpha=0.8, position = 'jitter') +
+  # gghighlight(quartier %in% 'Belair' & surface<80)+
+  ggtitle("Loyer d'appartements en Ville par\n rapport à la surface au 1er Juin 2020") +
+  labs(fill = "Quartiers",
+       caption = "Source: atHome \n*Le loyer comprend les charges mensuelles") +
+  xlab("Surface (m²)") +
+  ylab("Loyer* (€)") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
+        plot.caption = element_text(size = 8, face = "bold",color='#cecece'),
+        panel.grid.minor = element_blank(),
+        legend.justification=c(1,0), 
+        legend.position=c(0.95,0.02)) 
+
+```
+
+
+## Rendu Visuel{data-transition="none"}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
+ggplot(data=sub_luxflat) + #'Merl', 'Gare',
+  geom_point(aes(x=surface, y=prix, color=quartier), alpha=0.2, position = 'jitter') +
+  geom_point(data=sub_luxflat %>% filter(quartier %in% 'Kirchberg'), aes(x=surface, y=prix, color=quartier), alpha=0.8, position = 'jitter') +
+  # gghighlight(quartier %in% 'Belair' & surface<80)+
+  ggtitle("Loyer d'appartements en Ville par\n rapport à la surface au 1er Juin 2020") +
+  labs(fill = "Quartiers",
+       caption = "Source: atHome \n*Le loyer comprend les charges mensuelles") +
+  xlab("Surface (m²)") +
+  ylab("Loyer* (€)") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
+        plot.caption = element_text(size = 8, face = "bold",color='#cecece'),
+        panel.grid.minor = element_blank(),
+        legend.justification=c(1,0), 
+        legend.position=c(0.95,0.02)) 
+
+```
+
+
+
+## <span style="color:white;">Instructions</span>{data-background=#bca480}
+> * <span style="color:white;"> Quels sont les 3 quartiers où il y a le plus et 
+le moins d'appartements meublés ?<span style="color:#fdfbeb;"> (Voir `?slice`) </span> </span>
+> * <span style="color:white;"> Prix maximum, minimum et median par quartier</span>
+> * <span style="color:white;"> Surface maximum, minimum et mediane par quartier</span>
+> * <span style="color:white;"> Faire un graph partionné via `facet_wrap()` 
+    <br> en utilisant la variable `meuble`</span>
+> * <span style="color:white;"> _Pimp your graph_ </span>
+
+
+
+## Solution Proposée
+```{r, echo=TRUE, warning=FALSE, message=FALSE, results='hide', message=FALSE,fig.show='hide'}
+
+meuble_quartier <- luxflat %>% 
+  filter(meuble==1) %>% 
+  group_by(quartier) %>% 
+  summarise(n_appart=n()) %>% 
+  ungroup() %>% 
+  arrange(desc(n_appart)) %>% 
+  slice(1:3)
+
+
+luxflat %>% 
+  filter(meuble==1) %>% 
+  group_by(quartier) %>% 
+  summarise(n_appart=n()) %>% 
+  ungroup() %>% 
+  arrange(n_appart) %>% 
+  slice(1:3)
+  
+luxflat %>% 
+  group_by(quartier) %>% 
+  summarise(prix_max = max(prix), 
+            prix_min = min(prix),
+            prix_med = median(prix), 
+            surf_max = max(surface), 
+            surf_min = min(surface), 
+            surf_med = median(surface) )
+```
+
+## Solution Proposée
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
+ggplot(data=luxflat %>% 
+         filter(quartier %in% meuble_quartier$quartier) %>% 
+         mutate(meuble= ifelse(meuble==1, 'Appartements meublés','Appartements non meublés'))) + #'Merl', 'Gare',
+  geom_point(aes(x=surface, y=prix, color=quartier), alpha=0.8, position = 'jitter') +
+  facet_wrap(~meuble, nrow = 2) +
+  # geom_point(data=sub_luxflat %>% filter(quartier %in% 'Kirchberg'), aes(x=surface, y=prix, color=quartier), alpha=0.8, position = 'jitter') +
+  # gghighlight(quartier %in% 'Belair' & surface<80)+
+  ggtitle("Loyer d'appartements en Ville par\n rapport à la surface au 1er Juin 2020")  +
+  xlab("Surface (m²)") +
+  ylab("Loyer* (€)") +
+  theme_light()+
+  theme(plot.title = element_text(size = 15, 
+                                  face = "bold", hjust = 0.5),
+        plot.caption = element_text(size = 8, 
+                                    face = "bold",color='#cecece'),
+        #panel.grid.minor = element_blank(),
+        legend.position= 'bottom')+
+  labs(color = " ",
+       caption = "Source: atHome \n*Le loyer comprend les charges mensuelles")
+        
+
+```
+
+## Solution Proposée
+```{r, eval=FALSE}
+
+ggplot(data=luxflat %>% 
+         filter(quartier %in% meuble_quartier$quartier) %>% 
+         mutate(meuble= ifelse(meuble==1,
+         'Appartements meublés','Appartements non meublés'))) +
+  geom_point(aes(x=surface, y=prix, color=quartier), alpha=0.8, position = 'jitter') +
+  facet_wrap(~meuble, nrow = 2) +
+
+  ggtitle("Loyer d'appartements en Ville par\n rapport à la surface au 1er Juin 2020")  +
+  xlab("Surface (m²)") +
+  ylab("Loyer* (€)") +
+  theme_light()+
+  theme(plot.title = element_text(size = 15, 
+                                  face = "bold", hjust = 0.5),
+        plot.caption = element_text(size = 8, 
+                                    face = "bold",color='#cecece'),
+        #panel.grid.minor = element_blank(),
+        legend.position= 'bottom')+
+  labs(color = " ",
+       caption = "Source: atHome \n*Le loyer comprend les charges mensuelles")
+        
+
+```
+
+
+## <span style="color:black;">Graphique Interactif </span>{data-background=#eaf3f9}
+
+## Rendu Visuel
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(highcharter)
+
+hchart(sub_luxflat, type='scatter', 
+       hcaes(x=surface, y=prix, group=quartier)) %>%
+  hc_tooltip(pointFormat = " Surface: <b>{point.x} m²</b> 
+               <br/> Prix: <b>{point.y} €</b>") %>% 
+  hc_title( text="Loyer d'appartements en Ville<br>par rapport à la surface au 1er Juin 2020") %>%
+  hc_xAxis(title = list(text = "Surface (m²)")) %>% 
+  hc_yAxis(title = list(text = "Loyer* (€)"))   %>% 
+  hc_caption(
+    text = "*Le loyer comprend les charges mensuelles",
+    align = "right") %>% 
+  hc_credits(
+    enabled = TRUE, text = "Source: atHome",
+    href = "https://www.athome.lu/srp/?tr=rent&q=119ebefe,dea70e87,0258f3cd,f37c45a0&loc=L10-beggen,L10-kirchberg,L10-gasperich,L10-belair",
+    style = list(fontSize = "12px"))
+```
+
+## Code
+```{r, eval=FALSE, warning=FALSE, message=FALSE}
+library(highcharter)
+
+hchart(sub_luxflat, type='scatter', hcaes(x=surface, y=prix, group=quartier)) %>%
+  hc_tooltip(pointFormat = " Surface: <b>{point.x} m²</b> <br/>
+             Prix: <b>{point.y} €</b>") %>% 
+  hc_title( text="Loyer d'appartements en Ville<br>par rapport à la surface au 1er Juin 2020") %>%
+  hc_xAxis(title = list(text = "Surface (m²)")) %>% 
+  hc_yAxis(title = list(text = "Loyer* (€)")) %>% 
+  hc_caption(
+    text = "*Le loyer comprend les charges mensuelles",
+    align = "right") %>% 
+  hc_credits(
+    enabled = TRUE, text = "Source: atHome",
+    href = "https://www.athome.lu/srp/?tr=rent&q=119ebefe,dea70e87,0258f3cd,f37c45a0&loc=L10-beggen,L10-kirchberg,L10-gasperich,L10-belair",
+    style = list(fontSize = "12px"))
+```
+
+
+## <span style="color:white;">Instructions</span>{data-background=#bca480}
+> * <span style="color:white;"> Effectuer un graph interactif </span>
+> * <span style="color:white;"> _Pimp your graph_ </span>
+
+
+## <span style="color:white;">Récapitulatif </span>{data-background=#7ac58c}
+<!--<img src="transition1.png"  id="img_transition"> -->
+
+
+
+## {data-background=#7ac58c}
+> * <span style="color:white;"> Graphique : </span>
+> * <span style="color:white;"> &ensp; Titre, noms des axes, légende </span>
+> * <span style="color:white;"> Scatter Plot : </span>
+> * <span style="color:white;"> &ensp; 2 variables continues</span>
+> * <span style="color:white;"> &ensp; Comparer 2 variables, apercevoir des tendances</span>
+> * <span style="color:white;"> Code : </span>
+> * <span style="color:white;"> &ensp; `ggplot()+geom_point(DATA,aes(X,Y))` (Normal) </span>
+> * <span style="color:white;"> &ensp; `hchart(DATA,'scatter',hcaes(X,Y))` (Interactif) </span>
+> * <span style="color:white;"> &ensp; `slice()` en Manipulation de données </span>
+
+
+
+## {data-background=#00bdf2} 
+<span style="color:white;">Merci pour votre attention </span>
+
+## <span style="color:white;">Questions? </span>{data-background=#00bdf2}
+<!--<img src="transition2.png"  id="img_transition2"> -->
+
+
+<!--
+## <span style="color:white;"> </span>{data-background=#00bdf2}
+> * <span class="fragment fade-out" style="color:white;">Est-ce que dans notre environnement de travail, ça vaut la peine?</span> 
+> * <span style="color:white;">Ou trouver un exemple de présentation?</span>
+-->
+
+## <span style="color:white;">Contact</span> {data-background=#00bdf2}
+[Kevin Rosamont Prombo](kevinrosamont@ymail.com)
+
+<!--
+> *  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color:black;"> Un package et ses fonctions </span>
+> *  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color:black;"> Fonction avancées Regex </span>
+> *  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color:black;"> Fonctionnement Shiny </span>
+-->
+
+
+
+
+

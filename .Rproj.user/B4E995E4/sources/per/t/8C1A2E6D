@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1592287740631.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3758474928",
+    "id" : "8C1A2E6D",
+    "lastKnownWriteTime" : 1593521862,
+    "last_content_update" : 1593521862999,
+    "path" : "~/Documents/dataScience/bdl_presentation/0_101_intro_R.Rmd",
+    "project_path" : "0_101_intro_R.Rmd",
+    "properties" : {
+        "cursorPosition" : "414,0",
+        "last_setup_crc32" : "",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 9,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

@@ -1,0 +1,309 @@
+library(lubridate)
+library(readr)
+library(dplyr)
+library(purrr)
+library(tidyr)
+library(mice)
+library(tictoc)
+library(stringr)
+options(scipen=999)
+
+
+# https://data.public.lu/fr/datasets/liste-des-localites-avec-coordonnees/#_
+# localites <- readxl::read_xlsx("/Users/woza/Documents/dataScience/atHome/data/localites-et-lieux-avec-coordonnees-v2019-4.xlsx") %>% 
+# select(commune_admin = 1, commune_cadastre = 2, localite=3 ) %>% 
+# mutate(localite=str_to_title(stringi::stri_trans_general(str = localite, id = "Latin-ASCII")))
+
+# write_rds(localites, '/Users/woza/Documents/dataScience/atHome/data/localites.rds')
+
+# localites <-  read_rds('/Users/woza/Documents/dataScience/atHome/data/raw/localites.rds')
+old_tbl <- read_rds('/Users/woza/Documents/dataScience/immo/data/clean/tbl_analytics/tbl_atHome.rds')
+write_rds(old_tbl, paste0('/Users/woza/Documents/dataScience/immo/data/clean/backup/tbl_atHome_backup',str_replace_all(lubridate::today(),'-','_'),'.rds'))
+
+setwd('/Users/woza/Documents/dataScience/immo/data/raw/luxembourg/atHome/')
+
+today_rds_dd <- str_replace_all(lubridate::today(),"-","_")
+today_rds <- list.files(pattern = "*.rds") %>% 
+  str_detect(.,today_rds_dd)
+
+tbl <- list.files(pattern = "*.rds")[today_rds] %>% 
+  map_dfr(read_rds) %>% 
+  unnest(cols="data") 
+
+
+to_num <- c( 'surface', 'terrain', 'loyer', 'charges_mensuelles', 'caution') #prix
+
+to_dummy <- c('terrasse', 'balcon', 'jardin', 'cave', 'grenier', 'buanderie', 'ascenseur','pompe_chaleur', 
+              'panneaux_solaires', 'cuisine_separee', 'animaux_acceptes', 'acces_mobilite_reduite',
+              'cuisine_equipee', 'cuisine_ouverte','parquet', 'piscine', 'sauna', 'chauffage_geothermique',
+              'chauffage_gaz', 'cheminee', 'chauffage_mazout', 'chauffage_electrique', 'location_court_terme',
+              'logement_encadre', 'logement_cout_modere', 'meuble', 'renove', 'wc_separes')
+
+to_select <- c("id", "img", "link", "source", "title", "surface", "terrain", "type_annonce", "type_bien",  "type_bien_dtl",             
+               "pieces", "chambres", "annee_de_construction","quartier", "ville", #"renove",
+               "etage", "ascenseur", "salles_de_bains", "salles_de_douches", "wc_separes",
+               "terrasse", "balcon", "jardin", "cave", "buanderie",  "grenier", "cheminee", 
+               "cuisine_ouverte",  "cuisine_equipee", #"cuisine_separee",
+               "panneaux_solaires", "acces_mobilite_reduite", "charges_mensuelles", "caution", 
+               "meuble", 
+               "chauffage_gaz", "chauffage_electrique", "chauffage_geothermique", "chauffage_mazout",         
+               "montant_agence",  "piscine",  "place_parking", "parking_interieur", "parking_exterieur")
+
+
+prix_col_name <- tbl %>% 
+  select(contains("rix_2")) %>% 
+  names %>% 
+  sort
+
+last_prix <- last(prix_col_name)
+
+prix_col <- tbl %>% 
+  select(link, all_of(c(prix_col_name))) %>%
+  distinct() %>% 
+  pivot_longer(-link, names_to = "day", values_to = "valeur") %>% 
+  filter(!is.na(valeur)) %>% 
+  pivot_wider(id_cols = link, names_from = day, values_from = valeur) %>% 
+  mutate_at(vars(-link), function(x){
+    res <- str_replace_all(x, ',','.')
+    str_remove_all(res, '[^[:digit:]|.]') %>% 
+      as.numeric()}) 
+
+
+
+prix_col <- prix_col %>% 
+  select(link, all_of(prix_col_name)) 
+
+
+prix_col$prix <- prix_col %>% select(last_col()) %>% unlist
+
+
+tbl_analytics <- tbl %>% 
+  rename(pompe_chaleur=`pompe_à_chaleur`, logement_cout_modere=`logement_à_coût_modere`, 
+         chauffage_mazout=chauffage_au_mazout, chauffage_gaz = chauffage_au_gaz,
+         wc_separes=toilettes_separees, prix = !!last_prix ) %>%
+  group_by(link) %>% 
+  arrange(link, prix) %>% 
+  slice(1) %>% 
+  ungroup %>% 
+  select(-contains("prix"),-disponibilite) %>% 
+  left_join(prix_col, by="link") %>%
+  mutate(
+    mix = str_sub(str_extract(link,'(e/.*/id)|(n/.*/id)'), 3, -4),
+    id= str_sub(str_extract(link,'/id.*\\.'), 5, -2), 
+    type_annonce = str_extract(link ,'vente|location'),
+    source="atHome",
+    type_bien = str_sub(str_extract(mix,'^.*/'), 1, -2), 
+    lieu = str_sub(str_extract(mix,'/.*$'), 2, -1),
+    ville = str_to_title(
+      stringi::stri_trans_general(str = lieu, 
+                                  id = "Latin-ASCII")),
+    type_bien = case_when(
+      is.na(type_bien) & str_detect(link, "appartement") ~ "appartemment",
+      is.na(type_bien) & str_detect(link, "maison") ~ "maison",
+      is.na(type_bien) & str_detect(link, "chambre") ~ "chambre",
+      is.na(type_bien) ~ "autre",
+      TRUE ~ as.character(type_bien)),
+    title_l = tolower(title),
+    type_bien_dtl = case_when(
+      str_detect(title_l, "appartement") ~ "appartement",
+      str_detect(title_l, "penthouse") ~ "penthouse",
+      str_detect(title_l, "studio") ~ "studio",
+      str_detect(title_l, "immeuble") & str_detect(title_l, "rapport") ~ "immeuble-de-rapport",
+      str_detect(title_l, "immeuble") ~ "immeuble",
+      str_detect(title_l, "duplex") ~ "duplex",
+      str_detect(title_l, "triplex") ~ "triplex",
+      str_detect(title_l, "fond") & str_detect(title_l, "commerce") ~ "fonds-de-commerce",
+      str_detect(title_l, "maison") & str_detect(title_l, "maitre") ~ "maison-de-maitre",
+      str_detect(title_l, "maison") & str_detect(title_l, "rapport") ~ "maison-de-rapport",
+      str_detect(title_l, "maison") & str_detect(title_l, "individuelle") ~ "maison-individuelle",
+      str_detect(title_l, "maison") & str_detect(title_l, "mitoyenne") ~ "maison-mitoyenne",
+      str_detect(title_l, "maison") & str_detect(title_l, "jumelee") ~ "maison-jumelee",
+      str_detect(title_l, "maison") & str_detect(title_l, "village") ~ "maison-de-village",
+      str_detect(title_l, "maison") ~ "maison",
+      str_detect(title_l, "local") ~ "local",
+      str_detect(title_l, "bungalow") ~ "bungalow",
+      str_detect(title_l, "bureau") ~"bureau",
+      str_detect(title_l, "chalet") ~ "chalet",
+      str_detect(title_l, "colocation") ~ "chambre",
+      str_detect(title_l, "chateau" ) ~ "chateau" ,
+      str_detect(title_l, "loft") ~ "loft",
+      str_detect(title_l, "garage") ~"garage",
+      str_detect(title_l, "ferme") ~"ferme",
+      str_detect(title_l, "entrepot") ~"entrepot",
+      str_detect(title_l, "parking") ~"parking",
+      str_detect(title_l, "villa") ~"villa",
+      str_detect(title_l, "terrain") ~"terrain",
+      str_detect(title_l, "restaura|hotel") ~"restauration-hotellerie",
+      str_detect(title_l, "locaux commerciaux|commerce") ~"local commercial", 
+      str_detect(title_l, "entrep") ~"entrepot",
+      str_detect(title_l, "autres biens") ~"autre",
+      str_detect(title_l, "residence|lotissement|sidence") ~ "lotissement-residence",
+      str_detect(title_l, "chambre") ~ "chambre",
+      TRUE ~ "autre"
+    ),
+    salles_de_douches = ifelse(is.na(salle_de_douche), salles_de_douche,salle_de_douche),
+    salles_de_bains = ifelse(is.na(salle_de_bain), salles_de_bain,salle_de_bain),
+    place_parking= ifelse(!is.na(place_s__de_parking_dans_un_garage)| !is.na(place_s__de_parking_en_exterieur)| !is.na(place_s__de_parking_en_interieur), 1,0),
+    garage = case_when(
+      str_detect(place_s__de_parking_dans_un_garage,'[:digit:]') ~ as.numeric(str_remove_all(place_s__de_parking_dans_un_garage, '[^[:digit:]|.]')), 
+      str_detect(tolower(place_s__de_parking_dans_un_garage),"oui") | tolower(place_s__de_parking_dans_un_garage)=="yes" | tolower(place_s__de_parking_dans_un_garage)=="true"  ~ 1, 
+      TRUE ~ 0),
+    parking_exterieur = case_when(
+      is.na(place_s__de_parking_en_exterieur) ~ 0, 
+      str_detect(tolower(place_s__de_parking_en_exterieur),"oui") | tolower(place_s__de_parking_en_exterieur)=="yes" | tolower(place_s__de_parking_en_exterieur)=="true"  ~ 1, 
+      TRUE ~ 0),
+    parking_interieur = case_when(
+      is.na(place_s__de_parking_en_interieur) ~ 0, 
+      str_detect(tolower(place_s__de_parking_en_interieur),"oui") | tolower(place_s__de_parking_en_interieur)=="yes" | tolower(place_s__de_parking_en_interieur)=="true"  ~ 1, 
+      TRUE ~ 0),
+    grenier = ifelse(!is.na(grenier)|!is.na(grenier_amenageable)|!is.na(grenier_amenage), 1, 0),
+    nombre_de_chambres= ifelse(is.na(nombre_de_chambres), nombre_de_chambre, nombre_de_chambres)
+  ) %>% 
+  mutate_at(vars(all_of(to_num) ), function(x){
+    res <- str_replace_all(x, ',','.')
+    str_remove_all(res, '[^[:digit:]|.]') %>% 
+      as.numeric()
+    
+    # res <- str_replace_all(x, ',','.') %>% 
+    #   str_remove_all(., '[^[:digit:]|.]') 
+    # ifelse(str_detect(res, '[:digit:])'), as.numeric(res), NA)
+  })  %>% 
+  mutate_at(vars(all_of(to_dummy)), function(x){
+    res <- ifelse(tolower(x)=='oui'| tolower(x)=='yes'| tolower(x)=='ja'|str_detect(x,'[[:digit:]]'), 1, 0)
+    ifelse(is.na(res), 0, res)}) %>% 
+  distinct() %>% 
+  filter(prix >0) 
+
+#mutate(salle_eau= sum(as.numeric(salle_de_douche), as.numeric(salle_de_bain), na.rm = TRUE)) %>% 
+# select(-all_of(to_remove))
+tbl_analytics$type_bien <- ifelse( str_detect(tolower(tbl_analytics$title), '^chambre') | (tbl_analytics$type_bien=='appartement' & tbl_analytics$surface<=15), 'chambre', 
+                                   tbl_analytics$type_bien)
+
+tbl_analytics$quartier <- ifelse( str_detect(tolower(tbl_analytics$title), 'luxembourg'), str_trim(str_sub(str_extract(tbl_analytics$title, 'g-.*Réf'),3,-4)), 
+                                  tbl_analytics$lieu)
+
+
+
+
+
+
+
+df_honoraire_agence <- tbl_analytics %>% 
+  filter(!is.na(honoraires_d_agence)) %>% 
+  select(id, title,prix,  honoraires_d_agence, type_annonce) %>% 
+  mutate(is_tva = ifelse(str_detect(tolower(honoraires_d_agence), 'ht|vat|tva|17%'),1,0),
+         is_pct = ifelse(str_detect(honoraires_d_agence,'%') & !str_detect(honoraires_d_agence,'17%') 
+                         & !str_detect(honoraires_d_agence,'17 %'),1,0),
+         montant_agence = ifelse(is.na(honoraires_d_agence), 0, tolower(honoraires_d_agence)),
+         montant_agence = ifelse( str_detect(montant_agence, 'mois|miete'), prix,
+                                  str_replace_all(str_remove_all(str_sub(str_replace(montant_agence, 'tva |17%' ,''),1,7), '[^[:digit:]|.,]'), ',','.')),
+         montant_agence = ifelse( str_count(montant_agence, '\\.')>1 |str_count(montant_agence)==0, 0, montant_agence),
+         montant_agence = ifelse( str_count(montant_agence)==0, 0, as.numeric(montant_agence))
+  ) %>% 
+  mutate(montant_agence = case_when(
+    type_annonce=="location" & is_tva == 1 & is_pct == 1 ~ 1.17*prix*montant_agence/100,
+    is_pct == 1 ~ prix*montant_agence/100,
+    type_annonce=="location" & is_tva == 1 ~ 1.17*prix,
+    type_annonce=="location" & is.na(montant_agence) ~ 1.17*prix,
+    TRUE ~ montant_agence)
+  ) %>% 
+  select(id, is_tva, is_pct, montant_agence)
+
+
+tbl_analytics <- tbl_analytics %>% 
+  left_join(df_honoraire_agence, by="id") %>% 
+  mutate(pieces = nombre_de_pieces,
+         chambres= nombre_de_chambre,
+         etage = etage_du_bien)
+
+
+to_num <- c('salles_de_douches', 'salles_de_bains', 'chambres', 'pieces', 'montant_agence', 'chauffage_mazout')
+
+tbl_analytics <- janitor::clean_names(tbl_analytics) %>% 
+  mutate_at(all_of(to_num), as.numeric) %>% 
+  mutate(chambres=case_when(
+    type_bien_dtl=="chambre" ~ 1,
+    type_bien_dtl=="studio" ~ 0,
+    TRUE ~ as.numeric(chambres)),
+    etage = as.numeric(str_remove_all(etage,"[^[:digit:]]")),
+    caution = as.numeric(str_remove_all(caution,"[^[:digit:]]")),
+    annee_de_construction = as.numeric(str_remove_all(annee_de_construction,"[^[:digit:]]")))
+
+
+
+tbl_analytics_new_id <- tbl_analytics %>% 
+  filter(!link %in% unique(old_tbl$link) )
+
+tbl_analytics_new_price <- tbl_analytics %>% 
+  filter(link %in% unique(old_tbl$link) ) %>% 
+  select(link, contains("rix"))
+
+tbl_analytics <- old_tbl %>% 
+  select(-prix) %>% 
+  left_join(tbl_analytics_new_price, by='link') %>% 
+  bind_rows(tbl_analytics_new_id)
+
+
+
+imp_var <- c("id", "surface", "type_annonce", "type_bien", "type_bien_dtl", "chambres", 
+             "quartier", "ascenseur", "terrasse", "balcon", "jardin", "cave", "grenier",  
+             "cuisine_ouverte", "cuisine_equipee", "place_parking", "prix")
+
+
+size <- tbl_analytics %>% 
+  filter(tolower(type_bien) %in% c('appartement', 'maison')) %>% 
+  ungroup %>% 
+  select(all_of(imp_var)) 
+
+
+bien_na <- size %>% 
+  group_by(type_bien) %>% 
+  filter(is.na(surface)|is.na(chambres)) %>% 
+  summarise(n_na=n()) %>% 
+  .$type_bien
+
+impute_df <- bien_na %>% 
+  map_dfr(function(y){
+    
+    size <-  size %>% 
+      select(-type_bien_dtl) %>% 
+      filter(type_bien==y) %>% 
+      split(.$type_annonce)
+    
+    
+    
+    size %>% 
+      map_dfr(function(x){
+        df_noid <-  x %>% 
+          select(-id)
+        
+        res <- mice(df_noid, m = 5, maxit=100, print=F) %>% 
+          complete("long") %>% 
+          group_by(.id) %>% 
+          summarise(chambres=median(chambres),
+                    surface=median(surface))
+        
+        x %>%
+          mutate(chambres = res$chambres, 
+                 surface=res$surface) %>% 
+          select(id, chambres, surface)
+        
+      }) 
+    
+    
+  })
+
+
+tbl_analytics <- tbl_analytics %>%  
+  select(all_of(to_select), starts_with('prix'))  %>%  
+  rename(chambre_del=chambres, surface_del=surface) %>% 
+  left_join(impute_df, by='id') %>%  
+  mutate(chambres= ifelse(is.na(chambres), chambre_del, chambres),
+         surface= ifelse(is.na(surface), surface_del, surface)) %>% 
+  select(-ends_with('_del')) %>% 
+  select(-starts_with('prix'), everything())
+
+
+
+
+write_rds(tbl_analytics,'/Users/woza/Documents/dataScience/immo/data/clean/tbl_analytics/tbl_atHome.rds')

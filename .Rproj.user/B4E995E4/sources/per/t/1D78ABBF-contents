@@ -1,0 +1,259 @@
+library(shiny)
+library(tidyverse)
+library(ggiraph)
+library(ggthemes)
+library(mapproj)
+
+setwd("/Users/woza/Documents/dataScience/catch_fish/")
+#unemp_lux <- read.csv("unemployment_lux.csv", header = TRUE)
+
+marine <- rgdal::readOGR("data/FAO_AREAS/FAO_AREAS.shp")
+fish <- read_csv2("data/catch_data_2010_2017.csv")
+# NK means non-specified, so we don't need them, no need to remove, they will not match with the shape file
+
+#label of the fish
+label <- read_csv2("data/fish_ca_label.csv")
+label <- label %>%
+  mutate(Species = stringr::str_sub(SPECIES,1,3), SPECIES = stringr::str_sub(SPECIES,6)) %>%
+  rename(label = SPECIES) 
+
+#label of the countries
+country <- read_csv2("data/country_label.csv") %>%
+  purrr::map_df(as.character)
+# to have fish with the good label and Region format
+fish <- fish %>%
+  left_join(label) %>%
+  mutate(
+    label = trimws(gsub('\\"','', label)),
+    Region = gsub("_",".", as.character(Region)),
+    `Obs Value` = as.numeric(`Obs Value`)
+  ) %>%
+  filter(!grepl( "NK", Region) &!is.na(label) ) %>%
+  rename(value=`Obs Value`) %>%
+  left_join(country) %>%
+  select(-`Obs Status`, -`Obs Conf`,-Country2)
+ 
+sub_fish <- fish %>%
+  filter(Species == "F30" &
+         Country == "LTU" &
+         Time == 2015)
+  
+shp_df$F_AREA[shp_df$F_AREA %in% sub_fish$Region]
+# to have the shp file with the same code format than fish$code
+shp_df <- marine@data %>%
+  mutate( line=1:nrow(marine@data),
+          F_CODE=toupper(as.character(F_CODE))
+          ) %>% #MAJOR #SUBAREA #DIVISION
+  filter(F_CODE %in% sub_fish$Region & F_LEVEL=="DIVISION") %>%
+  left_join(sub_fish, by= c("F_CODE"="Region")) %>%
+  filter(!is.na(value)) %>%
+  mutate(tooltip=paste0(NAME_EN,"<br/>","\n",label,": ",value,"</br>","\n"#,
+                        #" Surface area: ", format(round(SURFACE/1000,0), nsmall=0, big.mark=","), " km2"
+                        )
+                        )
+
+end_name_en = gregexpr("Division",shp_df$NAME_EN) 
+
+# example data not easy to handle
+in_list <- function(x, data, sublist=1){
+  data[[x]][sublist]
+}
+
+stop_name <- 1:length(end)%>%
+  purrr::map(~in_list(.,data=end_name_en))%>%
+  reduce(rbind)
+
+shp_df$name <- trimws(stringr::str_sub(shp_df$NAME_EN, 1, (stop_name-2)))
+
+tooltip <- lapply(seq(nrow(shp_df)), function(i) {
+  paste0( '<b>', shp_df[i, "name"], '</b><br/>', 
+          shp_df[i, "label"], ': ', 
+          format(round(as.numeric(shp_df[i, "value"]), 3), nsmall=3, big.mark=",")#,'<br/><p>', 
+          #cities[i, "data"], '</p>' 
+          ) 
+})
+
+# add the division: from F_LEVEL NAME_EN
+
+library(sp)
+sp_df <- shp_df$line %>%
+  lapply(function(x){
+    marine@polygons[[x]]
+  }) %>%
+  SpatialPolygons
+
+library(leaflet)
+
+pal <- colorNumeric(
+  palette = "YlGnBu",
+  domain = shp_df$value
+)
+
+leaflet(sp_df) %>%
+  addTiles() %>%
+  addPolygons(smoothFactor = 0.3, fillOpacity = 0.2,
+              #stroke = FALSE,
+              weight = 1,
+              fillColor = pal(shp_df$value), 
+              color=pal(shp_df$value),
+              highlightOptions = highlightOptions(color = "white", weight = 2,
+                                                  bringToFront = TRUE), 
+              label = lapply(tooltip, htmltools::HTML)
+              #htmltools::htmlEscape(
+               # htmltools::HTML(shp_df$tooltip)
+              #)
+              )%>%
+  addLegend("bottomright", pal = pal, values = shp_df$value,
+            title = "Catch Fish <br> \n (tonnes live weight unit)",
+            opacity = 1
+  )
+
+
+
+library(highcharter)
+# get
+hcoptslang <- getOption("highcharter.lang")
+hcoptslang$thousandsSep <- ","
+options(highcharter.lang = hcoptslang)
+
+  hchart(fish %>%
+                      filter(Species == "F30" &
+                               Country == "LTU" &
+                               Region=="0"), "column", hcaes(x = Time, y = value), name="woza") %>%
+    hc_xAxis(
+      title = list(text = "Year")
+    ) %>%
+    hc_yAxis(
+      title = list(text = "Tonnes")
+    ) %>%
+    hc_title(
+      text = paste0("Catch Fishing Evolution for ", "Blue Jays")#input$species)
+    )
+
+
+
+
+html
+shp_df$line
+
+fish$label <- trimws(gsub('\\"','',fish$label))
+  
+t1 <- unique(gsub("_",".",fish$Region))
+t1 <- gsub("NK","N",t1)
+t1
+t2 <- unique(toupper(as.character(marine@data$F_CODE)))
+t2
+t1[!t1 %in% t2]
+t1[t1 %in% t2]
+
+t2[!t2 %in% t1]
+
+#communes$F_CODE
+#communes$F_DIVISION
+
+
+#tibble::tidy(communes)
+#tail(communes@data)
+#head(communes@data)
+
+#which(communes@data$F_AREA[communes@data$F_AREA %in% c(0, 21, 27, 34, 37, 41, 47, 51) & communes@data$F_LEVEL =="MAJOR"])
+keep <- marine@data %>%
+  mutate(line=1:nrow(marine@data)) %>%
+  filter(F_AREA %in% c(0, 21, 27, 34, 37, 41, 47, 51) & F_LEVEL =="MAJOR")
+#xxx=1
+df <- keep$line %>%
+  purrr::map(function(x){
+    res <- cbind(marine@polygons[[x]]@Polygons[[1]]@coords,x)
+    colnames(res) <- c("xcord","ycord","line")
+    res
+  }) %>%
+  reduce(rbind) %>%
+  as.data.frame() %>%
+  left_join(keep, by="line")
+
+
+
+
+nycounties <- geojsonio::geojson_read("/Users/woza/Downloads/gz_2010_us_outline_500k.json", what = "sp")
+# Or use the rgdal equivalent:
+# nycounties <- rgdal::readOGR("json/nycounties.geojson", "OGRGeoJSON")
+??colorNumeric
+pal <- colorNumeric("viridis", NULL)
+color
+pal <- colorBin("Greens", domain = 0:100)
+
+library(leaflet)
+
+library(maps)
+mapStates = map("state", fill = TRUE, plot = FALSE)
+subdf <- df %>%
+  filter(F_AREA %in% c(47,51)) %>%
+  mutate(col = pal(log10(line)))
+
+
+
+
+nycounties <- geojsonio::geojson_read("json/nycounties.geojson",
+                                      what = "sp")
+test <- read_xml("http://www.fao.org/figis/geoserver/area/ows?service=WFS&request=GetFeature&version=1.0.0&typeName=area:FAO_AREAS_NOCOASTLINE")
+test$node$
+e  
+library("XML")
+
+# Also load the other required package.
+library("methods")
+
+# Give the input file name to the function.
+result <- xmlParse(file = "http://www.fao.org/figis/geoserver/area/ows?service=WFS&request=GetFeature&version=1.0.0&typeName=area:FAO_AREAS_NOCOASTLINE")
+dff <- XML:::xmlAttrsToDataFrame(getNodeSet(result, path='//row'))
+result[2]
+rootnode <- xmlRoot(result)
+
+rootnode[3]
+library(multiplex)
+hh=read.gml(result)
+hh
+
+
+library(leaflet)
+library(sp)
+
+# data
+data <- data.frame(group = c("p_pladser.1", "p_pladser.1", "p_pladser.2","p_pladser.2", "p_pladser.3", "p_pladser.3", "p_pladser.4", "p_pladser.4","p_pladser.6", "p_pladser.6", "p_pladser.6"), lat = c(55.67179, 55.67171, 55.67143, 55.67135, 55.67110, 55.67099, 55.67173, 55.67158, 55.67155, 55.67154, 55.67145), long = c(12.55825, 12.55853, 12.55956, 12.55984, 12.56041, 12.56082, 12.55819, 12.55873, 12.55913, 12.55914, 12.55946))
+
+# turn into SpatialLines
+split_data = lapply(unique(data$group), function(x) {
+  df = as.matrix(data[data$group == x, c("long", "lat")])
+  lns = Lines(Line(df), ID = x)
+  return(lns)
+})
+
+data_lines = SpatialLines(split_data)
+
+leaflet(data_lines) %>%
+  addTiles() %>%
+  addPolylines()
+
+
+df2 <- keep$line %>%
+  lapply(function(x){
+     marine@polygons[[x]]
+  }) %>%
+  SpatialPolygons
+str(SpatialPolygons(list(marine@polygons[[1]], marine@polygons[[4]])))
+list(marine@polygons[[1,4]], marine@polygons[[4]])
+marine@polygons[[1]]
+leaflet(SpatialPolygons(df2)) %>%
+  addTiles() %>%
+  addPolygons(smoothFactor = 0.3, fillOpacity = 0.5,
+              fillColor = pal(keep$line),
+              highlightOptions = highlightOptions(color = "white", weight = 2,
+                                                  bringToFront = TRUE), label = as.character(keep$line))
+?addLegend
+dplyr::starwars
+pal <- colorNumeric("viridis", NULL)
+color
+pal <- colorBin("Greens", domain = 0:100)
+
+addPolygons(SpatialPolygons(df2),smoothFactor = 0.3, fillOpacity = 10,
+            fillColor = ~pal(log10(area)))

@@ -1,0 +1,33 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1593524594837.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "595B3478",
+    "lastKnownWriteTime" : 416611827712,
+    "last_content_update" : 1593524594837,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "D66FF4A",
+        "caption" : "count_loc",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=count_loc&cache_key=D66FF4A",
+        "displayedObservations" : 5,
+        "environment" : "",
+        "expression" : "count_loc",
+        "object" : "count_loc",
+        "preview" : 0,
+        "totalObservations" : 5,
+        "variables" : 2
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 33,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

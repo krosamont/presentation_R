@@ -1,0 +1,117 @@
+---
+title: 
+author: 
+date: 
+output: 
+  revealjs::revealjs_presentation: 
+    theme: simple
+    highlight: haddock
+    center: true
+    transition: slide
+    css: style.css
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+ 
+## R: Partage & Echange<br/> 
+<sub_title1> Package Highcharter</sub_title1> <img src="intro.png"  id="img_intro">
+
+## Contexte 
+Highcharter est <span style="color:#bca480;">wrapper</span> pour la librairie Highchart en js.<br>Ce package ajoute de l'interactivité aux graphes.
+
+> * Se programme facilement
+> * Beau rendu visuel
+> * Bonne notoriété (adWise) 
+
+<!--
+##
+The University of Luxembourg was founded in 2003
+
+> * Attracted the best professors
+> * <span style="color:blue;">11th place in Young University Ranking in 2017</span> 
+> * How Could the University be <span style="color:red;">better ranked</span>?
+
+remove -->
+
+## <span class="fragment fade-out">Problématiques</span>
+
+<span class="fragment fade-in" style="color:#bca480;">Quand et comment utiliser Highcharter? </span>
+
+
+<!-- 
+Ajouter graph ave le nombre de nouveaux packages sur CRAN
+-->
+
+## Support utilisé
+
+Highcharter a une plus value pour :
+
+> * Shiny App
+> * Partage un fichier généré par .Rmd
+
+
+
+## Fonction: hchart
+<span style="color:#bca480;">hchart()</span> est une fonction generique comme <span style="color:#bca480;">plot()</span>
+
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+
+hchart(diamantes$precio, name = "Precio")
+#hchart(millas, "point", hcaes(x = ciudad, y = autopista, group = clase))
+
+```
+
+
+## Exemple
+Afficher un graphe
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+data(economics_long, package = "ggplot2")
+library(highcharter)
+library(dplyr)
+
+economics_long2 <- economics_long %>% 
+  filter(variable %in% c("pop", "uempmed", "unemploy")) 
+hchart(economics_long2, "line", hcaes(x = date, y = value01, group = variable)) %>% 
+  hc_title(text = "Random Chart") %>% 
+  hc_subtitle(text = htmltools::HTML('Source: <a href="http://jkunst.com/highcharter/hchart.html" target="_blank" style="color:blue;">Highcharter</a>'))
+```
+
+## 
+Aide et exemple pour  [Highcharter](http://jkunst.com/highcharter/index.html)
+
+## <span style="color:white;">Récapitulatif </span>{data-background=#7ac58c}
+<!--<img src="transition1.png"  id="img_transition"> -->
+
+
+
+## {data-background=#7ac58c}
+
+> * <span style="color:white;"> A partir de `hchart()`, tous les graphs peuvent être fait</span>
+> * <span style="color:white;"> Personalisation facile du tooltip </span>
+> * <span style="color:white;"> Integrable dans un Shiny ou autre R Markdown </span>
+
+
+
+## {data-background=#00bdf2} 
+<span style="color:white;">Merci pour votre attention </span>
+
+## <span style="color:white;">Questions? </span>{data-background=#00bdf2}
+<!--<img src="transition2.png"  id="img_transition2"> -->
+
+
+## <span style="color:white;"> </span>{data-background=#00bdf2}
+> * <span class="fragment fade-out" style="color:white;">Si je maîtrise <span style="color:green;">ggplot2</span>, ai-je besoin de maîtriser <span style="color:blue">highcharter</span>?</span> 
+> * <span style="color:white;">Pourquoi <span style="color:blue">highcharter</span> et pas <span style="color:purple;">echarts4r</span> ou un autre package?</span>
+
+<!--
+> *  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color:black;"> Un package et ses fonctions </span>
+> *  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color:black;"> Fonction avancées Regex </span>
+> *  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color:black;"> Fonctionnement Shiny </span>
+-->
+
+
+
+
+

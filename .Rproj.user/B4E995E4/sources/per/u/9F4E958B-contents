@@ -1,0 +1,43 @@
+set.seed(23)
+dplyr::da
+n <- 10000
+?inner_join
+seg <- c(101:106, 110, 201:202, 204:209, 211:220, 294, 301:306, 399, 507, 517, 412)
+
+segment <- sample(seg, n, replace = TRUE) 
+
+# norm <- rnorm(n, 1000000, 12^5)
+# beta <- rbeta(n, 5, 2, ncp = 0)
+# unif <- runif(n, -20000,5*10^9)
+weibull <- rweibull(n, 6, 60)
+hist(weibull)
+mean(weibull)
+# gamma <- rgamma(10, 0.5, rate = 10^7)
+# 
+# gamma
+# hist(gamma)
+credit <- rweibull(n, 1, 10^7)
+gestion_discret <- rweibull(n, 1, 10^7)
+titre <- rweibull(n, 1, 10^7)
+cash <- rweibull(n, 1, 10^7)
+autre_actif_geres <- rweibull(n, 1, 10^7)
+
+bank <- data.frame(segment, credit, gestion_discret, titre, cash, autre_actif_geres) %>% 
+  
+max(gamma)
+hist(gamma)
+hist(weibull)
+hist(norm)
+hist(beta)
+
+hist(unif*beta)
+hist(norm*beta)
+
+t <- matrix(1:6, nrow=3)
+
+t[] <- 0
+df <- data.frame(runif(3),runif(3))
+
+names(df) <- c(1,2)
+
+df$`3` <- df$`1`+ df$`2`

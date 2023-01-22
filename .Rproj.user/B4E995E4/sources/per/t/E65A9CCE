@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1592616956544.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "565222229",
+    "id" : "E65A9CCE",
+    "lastKnownWriteTime" : 1587884209,
+    "last_content_update" : 1587884209,
+    "path" : "~/Documents/dataScience/exemple_reproductible/example_stack_cumul_graph.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "15,74",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 32,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

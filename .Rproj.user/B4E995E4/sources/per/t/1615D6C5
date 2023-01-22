@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1589660066857.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "891230423",
+    "id" : "1615D6C5",
+    "lastKnownWriteTime" : 1589451370,
+    "last_content_update" : 1589451370,
+    "path" : "~/Documents/dataScience/bdl_presentation/2_highcharter.Rmd",
+    "project_path" : "2_highcharter.Rmd",
+    "properties" : {
+        "cursorPosition" : "68,0",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

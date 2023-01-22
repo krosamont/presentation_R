@@ -1,0 +1,189 @@
+#r-partage-echange,#r-vador, #data-science, #communicate-with-data, #data-communication,
+#Communiquer-avec-des-donnees, #shiny{
+text-align: left;
+}
+
+img {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.tidyverse_image{
+      margin-bottom: -2em!important;
+}
+
+.tidyverse_image2{
+      margin-bottom: -1em!important;
+}
+
+#img_intro{
+    -webkit-transform: scale(4.5);
+    -moz-transform: scale(4.5);
+    -ms-transform: scale(4.5);
+    -o-transform: scale(4.5);
+    transform: scale(4.5);
+    /* position: inherit; */
+    float: right;
+    height: auto;
+    /* bottom: 116px; 
+    margin-top: -10vh;
+    margin-right: -5vw;*/
+    border: none;
+    box-shadow: none;
+    position: absolute;
+    max-width: 100%;
+    max-height: 100%;
+    right: 17%;
+    top: 0px;
+    border-radius: 5px;
+    width: 7rem;
+
+
+}
+
+#img_transition {
+    -webkit-transform: scale(1.5);
+    -moz-transform: scale(1.5);
+    -ms-transform: scale(1.5);
+    -o-transform: scale(1.5);
+    transform: scale(1.5);
+    /* position: inherit; */
+    float: right;
+    height: auto;
+    /* bottom: 116px; 
+    margin-top: -10vh;
+    margin-right: -5vw;*/
+    border: none;
+    box-shadow: none;
+    position: absolute;
+    max-width: 100%;
+    max-height: 100%;
+    right: -10vw;
+    top: 0px;  
+}
+
+
+#img_transition2 {
+    -webkit-transform: scale(4.5);
+    -moz-transform: scale(4.5);
+    -ms-transform: scale(4.5);
+    -o-transform: scale(4.5);
+    transform: scale(4.5);
+    /* position: inherit; */
+    float: right;
+    height: auto;
+    /* bottom: 116px; 
+    margin-top: -10vh;
+    margin-right: -5vw;*/
+    border: none;
+    box-shadow: none;
+    position: absolute;
+    max-width: 100%;
+    max-height: 100%;
+    right: -5vw;
+    top: 0px;  
+}
+
+#allegorie_html1, #allegorie_html2, #allegorie_html3 {
+  background:#000000;
+  transition:"none"
+}
+
+.fragment.step-fade-in-then-out {
+	opacity: 0;
+	display: none; }
+	
+.fragment.step-fade-in-then-out.current-fragment {
+	opacity: 1;
+	display: inline; }
+	
+.reveal ul {
+    list-style-type: none;
+}
+
+.reveal table {
+  border-width: 1px;
+  border-spacing: 2px;
+  border-style: solid;
+  border-color: gray;
+  border-collapse: collapse;
+  font-size: 0.7em;
+}
+
+table.dataTable {
+  width: 100%;
+  margin: 0 auto;
+  clear: both;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.reveal table td {
+  border: 1px;
+  border-width: 1px;
+  padding-left: 10px;
+  padding-right: 25px;
+  border-style: none;
+  border-color: gray;
+}
+
+.reveal table th {
+  border-width: 0px;
+  padding-left: 10px;
+  padding-right: 25px;
+  font-weight: bold;
+  border-color: gray;
+}
+
+.reveal table th {
+  border-width: 0px;
+  padding-left: 10px;
+  padding-right: 25px;
+  font-weight: bold;
+  border-color: gray;
+}
+
+table.dataTable.no-footer {
+  border-bottom: 1px solid #111;
+  border: 1px 1px 1px 1px;
+  border-left: 1px solid #111;
+  border-right: 1px solid #111;
+  border-top: 1px solid #111;
+}
+
+.multiCol {
+    display: table;
+    table-layout: fixed;  
+    width: 100%;
+    text-align: left;
+}
+
+div.col{
+        display: table-cell;
+        text-align: center;
+        vertical-align: top;
+        width: 50%;
+        padding: 2% 0 2% 3%; 
+    }
+
+/* pour presentation leaflet */
+.leaflet{
+  margin-left : 2.8em!important;
+}
+.leaflet-popup-content{
+font-size: initial!important;
+}
+.leaflet-popup-tip{
+  display: none!important;
+}
+
+.leaflet-control-layers-base{
+  font-size: initial!important;
+  text-align: initial!important;
+}
+.leaflet-control{
+  font:14px/16px Arial, Helvetica, sans-serif!important;
+}
+
+
+/* pour présentation shiny*/

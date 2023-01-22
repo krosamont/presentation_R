@@ -1,0 +1,221 @@
+---
+title: 
+author: 
+date: 
+output: 
+  revealjs::revealjs_presentation: 
+    theme: simple
+    highlight: haddock
+    center: true
+    transition: slide
+    css: ../assets/css/style.css
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## R & Vador<br/> 
+<sub_title1><span style="color:red; ">{highcharter}</span><br>Le côté obscure de la viz</sub_title1> <img src="../images/intro/intro_barchart.png"  id="img_intro">
+
+## Contexte 
+<span style="color:red; ">{highcharter}</span> est <span style="color:#bca480;">wrapper</span> pour la librairie Highchart en js.<br>Ce package ajoute de l'interactivité aux visuels.
+
+> * Se programme facilement
+> * Beau rendu visuel
+> * nombreux graphiques 
+
+
+## <span class="fragment fade-out">Problématiques</span>
+
+<span class="fragment fade-in" style="color:#bca480;">Quand et comment utiliser {highcharter}? </span>
+
+
+
+## 
+
+Highcharter a une valeur ajouté pour :
+
+> * Shiny App
+> * Intéragir avec un visuel
+> * Partage un fichier généré par .Rmd
+
+
+
+## Fonction: hchart
+<span style="color:#bca480;">hchart()</span> est une fonction générique comme <span style="color:#bca480;">plot()</span>
+
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+
+hchart(diamantes$precio, name = "Precio")
+
+```
+
+
+## Exemple
+Afficher un graphe
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+data(economics_long, package = "ggplot2")
+library(highcharter)
+library(dplyr)
+
+economics_long2 <- economics_long %>% 
+  filter(variable %in% c("pop", "uempmed", "unemploy")) 
+hchart(economics_long2, "line", hcaes(x = date, y = value01, group = variable)) %>% 
+  hc_title(text = "Random Chart") %>% 
+  hc_subtitle(text = htmltools::HTML('Source: <a href="http://jkunst.com/highcharter/hchart.html" target="_blank" style="color:blue;">Highcharter</a>'))
+```
+
+## Un Autre Exemple
+Répartition de la chambre des députés au Luxembourg
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+df <- data.frame(
+  stringsAsFactors = FALSE,
+  name = c(
+    "Demokratesch Partei",
+    "LSAP",
+    "Greng",
+    "CSV",
+    "ADR",
+    "PPL",
+    "Lénk"
+  ),
+  count = c(12, 10, 9, 21, 4, 2, 2),
+  col = c("#004A90", "#EB001F", "#64A12D", "#F7911D",
+                   "#00ADDC", "#AB58A8", "#8F0109"
+  ),
+  abbrv = c("DIE LINKE", "SPD", "GRÜNE", "FDP", "CDU", "CSU", "AfD")
+)
+
+hchart(
+  df,
+  "item",
+  hcaes(
+    name = name,
+    y = count,
+    label = abbrv,
+    color = col
+  ),
+  name = "Representatives",
+  showInLegend = TRUE,
+  size = "100%",
+  center = list("50%", "50%"),
+  startAngle = -100,
+  endAngle  = 100
+) %>% 
+  hc_subtitle(text = htmltools::HTML('Source: <a href="https://jkunst.com/highcharter/articles/highcharts.html#item" target="_blank" style="color:blue;">Highcharter</a>')) %>%
+  #hc_title(text = " ") %>%
+  hc_legend(labelFormat = '{name} <span style="opacity: 0.4">{y}</span>')
+```
+
+## Exemple: Pokemon par type
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(dplyr)
+pokemon <- readr::read_csv('https://gist.githubusercontent.com/armgilles/194bcff35001e7eb53a2a8b441e8b2c6/raw/92200bc0a673d5ce2110aaad4544ed6c4010f687/pokemon.csv') %>%
+  janitor::clean_names() %>% 
+  mutate(type_1_color = case_when(
+    type_1 == "Grass" ~ "#78c84f",
+    type_1 == "Fire" ~ "#f03838",
+    type_1 == "Water" ~ "#6790f0",
+    type_1 == "Bug" ~ "#a8b720",
+    type_1 == "Normal" ~ "#747474",
+    type_1 == "Poison" ~ "#9361c1",
+    type_1 == "Electric" ~ "#f1cf1e",
+    type_1 == "Ground" ~ "#705848",
+    type_1 == "Fairy" ~ "#ee99ac",
+    type_1 == "Fighting" ~ "#a8a878",
+    type_1 == "Psychic" ~ "#acd8d6",
+    type_1 == "Rock" ~ "#8f2f29",
+    type_1 == "Ghost" ~ "#c0acd8",
+    type_1 == "Ice" ~ "#74b7cf",
+    type_1 == "Dragon" ~ "#f08030",
+    type_1 == "Dark" ~ "#2e393d",
+    type_1 == "Steel" ~ "#e2e9ec",
+    type_1 == "Flying" ~ "#1eade5",
+    TRUE ~ ""
+  ) )
+
+lvl_opts <-  list(
+  list(
+    level = 1,
+    borderWidth = 0,
+    borderColor = "transparent",
+    dataLabels = list(
+      enabled = TRUE,
+      align = "left",
+      verticalAlign = "top",
+      style = list(
+        fontSize = "12px", 
+        textOutline = FALSE,
+        color = "white",
+        fontWeight = "normal"
+      )
+    )
+  ),
+  list(
+    level = 2,
+    borderWidth = 0,
+    borderColor = "transparent",
+    colorVariation = list(key = "brightness", to = 0.250),
+    dataLabels = list(enabled = FALSE),
+    style = list(
+      fontSize = "8px",
+      textOutline = FALSE, 
+      color = "white", 
+      fontWeight = "normal"
+    )
+  )
+)
+
+pkmn_min <- pokemon |> 
+  select(type_1, type_2, type_1_color) |>
+  mutate(type_1 = stringr::str_to_title(type_1)) |> 
+  mutate(type_2 = ifelse(is.na(type_2), type_1, paste(type_1, "-", type_2))) |>
+  mutate(val = 1)
+
+cols <- pkmn_min |> 
+  count(type_1, type_2, type_1_color, sort = TRUE) |> 
+  pull(type_1_color) |> 
+  unique()
+
+hchart(
+  data_to_hierarchical(pkmn_min, c(type_1, type_2), val, colors = cols),
+  type = "treemap",
+  # levelIsConstant = FALSE,
+  allowDrillToNode = TRUE,
+  levels = lvl_opts,
+  tooltip = list(valueDecimals = FALSE)
+) %>% 
+  hc_subtitle(text = htmltools::HTML('Source: <a href="https://jkunst.com/highcharter/articles/showcase.html#pokemon" target="_blank" style="color:blue;">Highcharter</a>')) |> 
+  hc_size(height = 650)
+```
+## 
+Aide et exemple pour  [Highcharter](http://jkunst.com/highcharter/index.html)
+
+## <span style="color:white;">Récapitulatif </span>{data-background=#7ac58c}
+
+
+
+## {data-background=#7ac58c}
+
+> * <span style="color:white;"> Beaucoup de visuels peuvent être réalisés</span>
+> * <span style="color:white;"> Personalisation facile du tooltip </span>
+> * <span style="color:white;"> Intégrable dans une <span style="color:#414141;">Shiny App</span> ou document <span style="color:#414141;">RMarkdown</span> </span>
+
+
+
+## {data-background=#00bdf2} 
+<span style="color:white;">Merci pour votre attention </span>
+
+## <span style="color:white;">Questions? </span>{data-background=#00bdf2}
+
+<!--
+## <span style="color:white;"> </span>{data-background=#00bdf2}
+> * <span class="fragment fade-out" style="color:white;">Si je maîtrise <span style="color:green;">ggplot2</span>, ai-je besoin de maîtriser <span style="color:blue">highcharter</span>?</span> 
+> * <span style="color:white;">Pourquoi <span style="color:blue">highcharter</span> et pas <span style="color:purple;">echarts4r</span> ou un autre package?</span>
+
+-->
+
+
+
+

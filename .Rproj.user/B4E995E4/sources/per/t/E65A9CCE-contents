@@ -1,0 +1,32 @@
+library(dplyr)
+library(highcharter)
+library(purrr)
+
+hc <- highchart() %>% 
+  hc_chart(type = "area") %>% 
+  hc_title(text = "Historic and Estimated Worldwide Population Distribution by Region") %>% 
+  hc_subtitle(text = "Source: Wikipedia.org") %>% 
+  hc_xAxis(categories = c("1750", "1800", "1850", "1900", "1950", "1999", "2050"),
+           tickmarkPlacement = "on",
+           min=1,
+           max=6,
+           title = list(enabled = FALSE)) %>% 
+  hc_yAxis(title = list(text = "Percent")) %>% 
+  hc_tooltip(pointFormat = " </b><span style=\"color:{series.color}\">{series.name}</span>:
+             <b>{point.percentage:.1f}%</b> {point.y:,.0f} millions)<br/>",
+             shared = TRUE) %>% 
+  hc_plotOptions(area = list(
+    stacking = "normal",
+    lineColor = "#ffffff",
+    lineWidth = 1,
+    marker = list(
+      enabled= FALSE
+    ))) %>% 
+  hc_add_series(name = "Asia", data = c(502, 635, 809, 947, 1402, 3634, 5268)) %>% 
+  hc_add_series(name = "Africa", data = c(106, 107, 111, 133, 221, 767, 1766)) %>%
+  hc_add_series(name = "Europe", data = c(163, 203, 276, 408, 547, 729, 628)) %>% 
+  hc_add_series(name = "America", data = c(18, 31, 54, 156, 339, 818, 1201)) %>% 
+  hc_add_series(name = "Oceania", data = c(2, 2, 2, 6, 13, 30, 46)) 
+
+hc
+

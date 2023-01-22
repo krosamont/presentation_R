@@ -1,0 +1,307 @@
+---
+title: 
+author: 
+date: 
+output: 
+  revealjs::revealjs_presentation: 
+    theme: simple
+    highlight: haddock
+    center: true
+    transition: slide
+    css: style.css
+---
+
+
+## Data Science<br/> 
+<sub_title1>Data Storytelling </sub_title1> <img src="intro.png"  id="img_intro">
+
+## <span style="color:white;"> Séance Précendente </span>{data-background=#7ac58c}
+<br>
+
+> * <span style="color:white;"> Pie Chart : </span>
+> * <span style="color:white;"> &ensp; une variable continue et une variable categorielle</span>
+> * <span style="color:white;"> &ensp; Répartition d'une variable</span>
+> * <span style="color:white;"> Code : </span>
+> * <span style="color:white;"> &ensp; `ggplot()+geom_bar(DATA,aes(X,Y))+`<br>
+                                &ensp; `coord_polar("y", start = 0)` (Normal) </span>
+> * <span style="color:white;"> &ensp; `hchart(DATA,'pie',hcaes(X,Y))` (Interactif) </span>
+
+
+## Type de graphiques
+<img height="350" align="center"  src="image/graph_descriptions.png"/> 
+
+<!--
+## <span style="color:black;">Scatter Plot </span>{data-background=#eaf3f9}
+-->
+
+## <span style="color:black;">Data Storytelling </span>{data-background=#eaf3f9}
+
+## <span> </span>
+Délivrer un message via une histoire<br>qui s'appuie sur des données 
+
+<!-- plutôt que de cumuler les graphiques et indicateurs -->
+> * Tres populaire dans le milieu du journalisme
+> * De plus en plus populaire dans les présentations
+> * Facile à mémoriser
+
+## Pourquoi ne pas juste cumuler des graphiques et indicateurs?
+<!-- Délivrer un message via une histoire qui s'appuie sur des données 
+plutôt que de cumuler les graphiques et indicateurs -->
+> * Capte l'attention
+> * Sucite l'interaction
+> * Facile à mémoriser
+
+## Story Telling
+3 Étapes clefs
+
+> * Situation initiale (présentation du sujet)
+> * Element perturbateur (Problématique)
+<!-- Peripeties -->
+<!-- Resolution -->
+> * Situation finale
+
+## Déroulement
+
+Annoncer les points clefs
+
+<!-- Peripeties -->
+<!-- Resolution -->
+> * Situation finale
+
+## Étude de cas
+Une Banque implantée en Europe est préocupée par le taux de 
+démission dans ses effectifs et veut y remédier.
+
+## Déroulement
+> * Identifier le profil type des personnes qui démissionnent
+> * Effectuer des recommandations
+
+
+## Solution Proposée {data-transition="none-out"}
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=3}
+library(tidyverse)
+churn <- read_csv('/Users/woza/Documents/dataScience/bdl_presentation/data/session7/Churn_Modelling.csv')
+
+churn2 <- churn %>% 
+  select(-Surname, -RowNumber, -CustomerId) %>% 
+  mutate(cat_age= case_when(Age <= 25 ~ '18-25',
+                            Age <= 35 ~ '26-35',
+                            Age <= 45 ~ '36-45',
+                            Age <= 55 ~ '46-55',
+                            Age <= 65 ~ '56-65',
+                            Age <= 75 ~ '66-75',
+                            TRUE ~ '76 et plus'),
+         cat_age=factor(cat_age)) 
+
+t00 <- churn2 %>% 
+  group_by(Geography, Gender, Exited) %>% 
+  summarize(n=n()) %>% 
+  mutate(Exited=ifelse(Exited==0,"stayed","churn")) %>%
+  pivot_wider(names_from = Exited, values_from=n) %>% 
+  mutate(n=stayed+churn,
+         pct_churn= churn/n,
+         Geography= factor(Geography, levels=c('France', 'Spain', 'Germany')))
+
+t02 <- churn2 %>% 
+  group_by(Geography,  Exited) %>% 
+  summarize(n=n()) %>% 
+  mutate(Exited=ifelse(Exited==0,'effectif','départ')) %>%
+  mutate(Geography= factor(Geography, levels=c('France', 'Spain', 'Germany')),
+         Exited = factor(Exited, levels=c('effectif','départ'))) %>% 
+  group_by(Geography) %>% 
+  mutate(pct=round(n/sum(n)*100,1))
+
+# Montrer ce graph en 1
+g1 <- ggplot(t02,aes(x=Geography, y=n, fill=Exited)) + 
+  geom_bar(stat = 'identity', width=0.7, 
+           position=position_dodge(width=0.8)) +
+  geom_text(aes(label=ifelse(Exited=='effectif','',paste0(pct,' %'))), position = position_dodge(width=0.8), vjust = -0.5,  size=2.2) +
+  ggtitle("Nombre d'employés partis par pays") +
+  labs(fill='') +
+  xlab("Pays") +
+  ylab("#Employés") +
+  scale_fill_manual(values=c( '#b2b4b7', '#e0e0e0')) + ##f37b7b d49cc0
+  theme_minimal() +
+  theme(plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
+        panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_blank())
+
+# Montrer ce graph en 2
+g2 <- ggplot(t00,aes(x=Geography, y=pct_churn*100, fill=Gender)) + 
+  geom_bar(stat = 'identity',
+           width=0.7, position=position_dodge(width=0.8)) +
+  ggtitle("Pourcentage d'employés partis\npar pays et par sexe") +
+  labs(fill='') +
+  xlab("Pays") +
+  ylab("taux de départ (%)") +
+  scale_fill_manual(values=c( '#d49cc0','#b2b4b7')) +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
+        panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_blank())
+
+# gridExtra::grid.arrange(g1, g2, nrow = 2)
+g1
+```
+
+
+<span style="visibility: hidden;">
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=3}
+g2
+```
+</span>
+
+## Solution Proposée {data-transition="none"}
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=3}
+g1 +
+  geom_bar(data= t02 %>% filter(Geography=="Germany" ), 
+           aes( group=Exited), stat = 'identity', width=0.7, fill=c('#b2b4b7','#f37b7b'),
+           position=position_dodge(width=0.8)) 
+```
+
+
+<span style="visibility: hidden;">
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=3}
+g2
+```
+</span>
+
+## Solution Proposée {data-transition="none"}
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=3}
+g1 +
+  geom_bar(data= t02 %>% filter(Geography=="Germany" ), 
+           aes( group=Exited), stat = 'identity', width=0.7, fill=c('#b2b4b7','#f37b7b'),
+           position=position_dodge(width=0.8)) 
+```
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=3}
+g2
+```
+
+
+## Solution Proposée {data-transition="none"}
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=3}
+g1 +
+  geom_bar(data= t02 %>% filter(Geography=="Germany" ), 
+           aes( group=Exited), stat = 'identity', width=0.7, fill=c('#b2b4b7','#f37b7b'),
+           position=position_dodge(width=0.8)) 
+```
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=3}
+g2 +
+  geom_bar(data= t00 %>% filter(Geography=="Germany" ), 
+           aes( group=Gender), stat = 'identity', width=0.7, fill=c('#f37b7b', '#b2b4b7'),
+           position=position_dodge(width=0.8)) 
+```
+
+
+
+## Rendu Visuel{data-transition="none-out"}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+t03 <- churn2 %>% 
+  filter(Geography=="Germany" & Gender=='Female' & Age<76) %>%
+  group_by(Geography, Gender, Exited, cat_age) %>% 
+  summarize(n=n()) %>% 
+  mutate(Exited=ifelse(Exited==0,"stayed","churn"))%>%
+  pivot_wider(names_from = Exited, values_from=n) %>% 
+  mutate(n=stayed+churn,
+         pct_churn= churn/n)
+
+g3 <- ggplot(t03,aes(x=cat_age, y=round(pct_churn*100,2), fill=cat_age)) + 
+  geom_bar(stat = 'identity',
+           width=0.7, position=position_dodge(width=0.7))+
+  geom_segment(data=churn2, aes(x = 0, xend = 7, y = 20, yend = 20), lwd=0) +
+  # geom_text( aes(x = 1, y = 22, label="tx départ moy."), size=3) +
+  
+  # geom_line(data=churn2, aes(x=cat_age, y=rep(sum(Exited)/nrow(churn2)*100,nrow(churn2))))
+  ggtitle("Pourcentage d'employés partis\npar age chez les femmes en Allemagne ") +
+  xlab("Age") +
+  ylab("taux de départ (%)") +
+  scale_fill_manual(values=c( '#b2b4b7','#b2b4b7','#b2b4b7','#f37b7b', '#f37b7b','#b2b4b7','#b2b4b7')) +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
+        panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        legend.position = 'none')
+
+g3
+```
+
+## Rendu Visuel{data-transition="none"}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
+g3 +
+  geom_segment(data=churn2, aes(x = 0, xend = 7, y = 20, yend = 20), linetype = "dashed") +
+  geom_text( aes(x = 1, y = 22, label="tx départ moy."), size=3) 
+  
+
+```
+
+
+
+## Persona
+<img src="image/session7/woman_round.png" alt="woman 2nd career" style="width: 35%;">
+
+> * <p style=" text-align: center; font-size: x-large;"> Femme Allemande </p>
+> * <p style=" text-align: center; font-size: x-large;"> En seconde partie de carriere</p>
+> * <p style=" text-align: center; font-size: x-large;"> Ne participant pas aux activités</p>
+
+## Recommandation
+
+> * <p style="text-align: center; "> Surmenagement en Allemagne/management </p>
+> * <p style="text-align: center; "> Avoir plus d'employés actifs au sein de la banque</p>
+> * <p style="text-align: center; "> Proposé un programme en seconde partie de carriere</p>
+
+
+## <span style="color:white;">Instructions</span>{data-background=#bca480}
+> * <span style="color:white;"> Trouver un jeu de données </span>
+> * <span style="color:white;"> Utiliser 2 types de graphes </span>
+> * <span style="color:white;"> Construire le narratif pour<br>mettre en avant des faits </span>
+
+
+## <span style="color:white;">Récapitulatif </span>{data-background=#7ac58c}
+<!--<img src="transition1.png"  id="img_transition"> -->
+
+
+
+## {data-background=#7ac58c}
+> * <span style="color:white;"> Pie Chart : </span>
+> * <span style="color:white;"> &ensp; une variable continue et une variable categorielle</span>
+> * <span style="color:white;"> &ensp; Répartition d'une variable</span>
+> * <span style="color:white;"> Code : </span>
+> * <span style="color:white;"> &ensp; `ggplot()+geom_bar(DATA,aes(X,Y))+`<br>
+                                &ensp; `coord_polar("y", start = 0)` (Normal) </span>
+> * <span style="color:white;"> &ensp; `hchart(DATA,'pie',hcaes(X,Y))` (Interactif) </span>
+
+
+
+## {data-background=#00bdf2} 
+<span style="color:white;">Merci pour votre attention </span>
+
+## <span style="color:white;">Questions? </span>{data-background=#00bdf2}
+<!--<img src="transition2.png"  id="img_transition2"> -->
+
+<!--
+## <span style="color:white;"> </span>{data-background=#00bdf2}
+> * <span class="fragment fade-out" style="color:white;">Est-ce que dans notre environnement de travail, ça vaut la peine?</span> 
+> * <span style="color:white;">Ou trouver un exemple de présentation?</span>
+-->
+
+## <span style="color:white;">Contact</span> {data-background=#00bdf2}
+[Kevin Rosamont Prombo](kevinrosamont@ymail.com)
+
+<!--
+> *  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color:black;"> Un package et ses fonctions </span>
+> *  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color:black;"> Fonction avancées Regex </span>
+> *  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color:black;"> Fonctionnement Shiny </span>
+-->
+
+
+
+
+

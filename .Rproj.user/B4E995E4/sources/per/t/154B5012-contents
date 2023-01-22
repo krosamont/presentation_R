@@ -1,0 +1,267 @@
+---
+title: 
+author: 
+date: 
+output: 
+  revealjs::revealjs_presentation: 
+    theme: simple
+    highlight: haddock
+    center: true
+    transition: slide
+    css: style.css
+---
+
+
+## Data Science<br/> 
+<sub_title1>Visualization: Pie Chart </sub_title1> <img src="intro.png"  id="img_intro">
+
+## <span style="color:white;"> Séance Précendente </span>{data-background=#7ac58c}
+<br>
+
+> * <span style="color:white;"> Bar Plot : </span>
+> * <span style="color:white;"> &ensp; une variable continue et une variable categorielle</span>
+> * <span style="color:white;"> &ensp; Comparer des entités avec peu de points</span>
+> * <span style="color:white;"> Code : </span>
+> * <span style="color:white;"> &ensp; `ggplot()+geom_bar(DATA,aes(X,Y))` (Normal) </span>
+> * <span style="color:white;"> &ensp; `hchart(DATA,'column',hcaes(X,Y))` (Interactif) </span>
+
+
+## Type de graphiques
+<img height="350" align="center"  src="image/graph_descriptions.png"/> 
+
+<!--
+## <span style="color:black;">Scatter Plot </span>{data-background=#eaf3f9}
+-->
+
+## Pie Chart
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(janitor)
+
+
+location <- read_csv('/Users/woza/Documents/dataScience/bdl_presentation/data/session6/ab_nyc2019.csv')
+
+sub_loc <- location %>% 
+  filter(!is.na(latitude) & !is.na(neighbourhood_group))
+
+# sub_loc %>% 
+#   group_by(neighbourhood_group) %>% 
+#   summarise(n_appart=n())
+
+sub_loc <- sub_loc %>%
+  # mutate(neighbourhood_group=ifelse(neighbourhood_group %in% c("St. George", "Staten Island", "Bronx"), "Autres*", neighbourhood_group))
+  mutate(neighbourhood_group=ifelse(neighbourhood_group=="St. George", "Staten Island", neighbourhood_group))
+  
+count_loc <- sub_loc %>% 
+  group_by(neighbourhood_group) %>% 
+  summarise(n_appart=n()) %>% 
+  ungroup() %>% 
+  arrange(desc(neighbourhood_group)) %>% 
+  mutate(pct = round(100*n_appart/sum(n_appart),1),
+         pct_label = cumsum(pct) - 0.5*pct,
+         n_label = ifelse(n_appart>4000, format(n_appart, digits=9, big.mark=" ", small.interval=3),""),
+         nb_pct = paste0(neighbourhood_group, " (",pct,"%)"))
+  
+pie1 <- ggplot(count_loc, aes(x="", y=pct, fill=nb_pct)) +
+  geom_bar(stat = "identity", color = "white") +
+  coord_polar("y", start = 0) +
+  labs(fill="Quartiers",
+       title = "Répartition du nombre de location/ndisponible par quartier en 2019") +
+  theme_void() +
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.85),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_blank()) 
+
+pie1
+
+```
+
+## Code Pie Chart
+```{r, eval=FALSE, warning=FALSE, message=FALSE}
+library(ggplot)
+ggplot(data= YOUR_DATASET, aes(x= "", y= Y_AXIS_VAR, fill= GROUP_VAR)+
+  
+  geom_bar(stat="identity", 
+           color="white") + # Optional
+  coord_polar("y", start = 0) +
+
+  ggtitle("YOUR TITLE") + # The Graph title
+  
+  theme_void() +      # Optional
+  theme(plot.title = element_text(size = 15,  hjust = 0.5), # Optional
+        panel.grid.minor = element_blank(), # Optional
+        panel.grid.major.x = element_blank() # Optional
+        ) 
+
+```
+
+## <span style="color:white;">Instructions</span>{data-background=#bca480}
+> * <span style="color:white;"> Lire le fichier `ab_nyc2019.csv` </span>
+> * <span style="color:white;"> Aperçu du dataset <span style="color:#fdfbeb;"> (Voir `?skim`) </span> </span>
+> * <span style="color:white;"> Enlever les lignes non désirables </span>
+> * <span style="color:white;"> Format adéquate pour faire un graphe </span>
+> * <span style="color:white;"> Faire un graphe représentant la répartition du nombre de biens par quartier </span>
+> * <span style="color:white;"> _Pimp your graph_ </span>
+
+
+
+## Solution Proposée 
+```{r, eval=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(skimr)
+
+location <- read_csv('/data/session6/ab_nyc2019.csv')
+
+location %>% 
+  skim 
+
+count_loc <- sub_loc %>% 
+  group_by(neighbourhood_group) %>% 
+  summarise(n_appart=n()) %>% 
+  ungroup() %>% 
+  arrange(desc(neighbourhood_group)) %>% 
+  mutate(pct = round(100*n_appart/sum(n_appart),1),
+         pct_label = cumsum(pct) - 0.5*pct,
+         n_label = ifelse(n_appart>4000, format(n_appart, digits=9, big.mark=" ", small.interval=3),""),
+         nb_pct = paste0(neighbourhood_group, " (",pct,"%)"))
+  
+pie1 <- ggplot(count_loc, aes(x="", y=pct, fill=nb_pct)) +
+  geom_bar(stat = "identity", color = "white") +
+  coord_polar("y", start = 0) +
+  labs(fill="Quartiers",
+       title = "Répartition du nombre de location/ndisponible par quartier en 2019") +
+  geom_text(aes( y = pct_label, label = n_label), color = "white") +
+  theme_void() +
+  theme(plot.title = element_text(size = 10, face = "bold", hjust = 4),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_blank()) 
+
+```
+
+## Rendu Visuel
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
+pie1 +
+  geom_text(aes( y = pct_label, label = n_label), color = "white")
+
+```
+
+
+
+
+## <span style="color:black;">Graphique Interactif </span>{data-background=#eaf3f9}
+
+## Rendu Visuel
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(highcharter)
+
+sub_loc <- sub_loc %>%
+  mutate(neighbourhood_group=ifelse(neighbourhood_group %in% c("St. George", "Staten Island",
+                                                               "Bronx"), "Autres*", neighbourhood_group))
+count_loc <- sub_loc %>% 
+  group_by(neighbourhood_group) %>% 
+  summarise(n_appart=n()) %>% 
+  ungroup() %>% 
+  arrange(desc(neighbourhood_group)) %>% 
+  mutate(pct = round(100*n_appart/sum(n_appart),0),
+         pct_label = cumsum(pct) - 0.5*pct,
+         n_label = ifelse(n_appart>4000, format(n_appart, digits=9, big.mark=" ", small.interval=3),""),
+         nb_pct = paste0(neighbourhood_group, " (",pct,"%)"))
+
+hchart(count_loc, "pie", hcaes(x=neighbourhood_group,  y = n_appart)) %>% 
+  hc_tooltip(pointFormat = "nbre de biens: <b>{point.y}</b>") %>% 
+  hc_title( text="Répartition du nombre de location<br>disponible par quartier en 2019") %>%
+  hc_credits(
+    enabled = TRUE, text = "Source: Kaggle",
+    href = "https://www.kaggle.com/dgomonov/new-york-city-airbnb-open-data",
+    style = list(fontSize = "12px")) %>% 
+hc_caption(
+  text = "*Comprend les quartiers du Bronx, St. George et Staten Island ",
+  align = "right") %>% 
+  hc_plotOptions(pie =list(dataLabels = list(enabled = TRUE,
+                                             format="{point.neighbourhood_group}: {point.percentage:.2f} %"))) 
+
+```
+
+
+## Code
+```{r, eval=FALSE, warning=FALSE, message=FALSE}
+
+sub_loc <- sub_loc %>%
+  mutate(neighbourhood_group=ifelse(neighbourhood_group %in% c("St. George", "Staten Island",
+                                                               "Bronx"), "Autres*", neighbourhood_group))
+count_loc <- sub_loc %>% 
+  group_by(neighbourhood_group) %>% 
+  summarise(n_appart=n()) %>% 
+  ungroup() %>% 
+  arrange(desc(neighbourhood_group)) %>% 
+  mutate(pct = round(100*n_appart/sum(n_appart),0),
+         pct_label = cumsum(pct) - 0.5*pct,
+         n_label = ifelse(n_appart>4000, format(n_appart, digits=9, 
+                                         big.mark=" ", small.interval=3),""),
+         nb_pct = paste0(neighbourhood_group, " (",pct,"%)"))
+
+hchart(count_loc, "pie", hcaes(x=neighbourhood_group,  y = n_appart)) %>% 
+  hc_tooltip(pointFormat = "nbre de biens: <b>{point.y}</b>") %>% 
+  hc_title( text="Répartition du nombre de location<br>
+            disponible par quartier en 2019") %>%
+  hc_credits(
+    enabled = TRUE, text = "Source: Kaggle",
+    href = "https://www.kaggle.com/dgomonov/new-york-city-airbnb-open-data",
+    style = list(fontSize = "12px")) %>% 
+hc_caption(
+  text = "*Comprend les quartiers du Bronx, St. George et Staten Island ",
+  align = "right") %>% 
+  hc_plotOptions(pie =list(dataLabels = list(enabled = TRUE,
+      format="{point.neighbourhood_group}: {point.percentage:.2f} %"))) 
+
+```
+
+
+## <span style="color:white;">Instructions</span>{data-background=#bca480}
+> * <span style="color:white;"> Effectuer un graph interactif </span>
+> * <span style="color:white;"> _Pimp your graph_ </span>
+
+
+## <span style="color:white;">Récapitulatif </span>{data-background=#7ac58c}
+<!--<img src="transition1.png"  id="img_transition"> -->
+
+
+
+## {data-background=#7ac58c}
+> * <span style="color:white;"> Pie Chart : </span>
+> * <span style="color:white;"> &ensp; une variable continue et une variable categorielle</span>
+> * <span style="color:white;"> &ensp; Répartition d'une variable</span>
+> * <span style="color:white;"> Code : </span>
+> * <span style="color:white;"> &ensp; `ggplot()+geom_bar(DATA,aes(X,Y))+`<br>
+                                &ensp; `coord_polar("y", start = 0)` (Normal) </span>
+> * <span style="color:white;"> &ensp; `hchart(DATA,'pie',hcaes(X,Y))` (Interactif) </span>
+
+
+
+## {data-background=#00bdf2} 
+<span style="color:white;">Merci pour votre attention </span>
+
+## <span style="color:white;">Questions? </span>{data-background=#00bdf2}
+<!--<img src="transition2.png"  id="img_transition2"> -->
+
+<!--
+## <span style="color:white;"> </span>{data-background=#00bdf2}
+> * <span class="fragment fade-out" style="color:white;">Est-ce que dans notre environnement de travail, ça vaut la peine?</span> 
+> * <span style="color:white;">Ou trouver un exemple de présentation?</span>
+-->
+
+## <span style="color:white;">Contact</span> {data-background=#00bdf2}
+[Kevin Rosamont Prombo](kevinrosamont@ymail.com)
+
+<!--
+> *  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color:black;"> Un package et ses fonctions </span>
+> *  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color:black;"> Fonction avancées Regex </span>
+> *  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color:black;"> Fonctionnement Shiny </span>
+-->
+
+
+
+
+

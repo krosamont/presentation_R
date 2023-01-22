@@ -1,0 +1,427 @@
+---
+title: 
+author: 
+date: 
+output: 
+  revealjs::revealjs_presentation: 
+    theme: simple
+    highlight: haddock
+    center: true
+    transition: slide
+    css: style.css
+---
+
+ 
+## Data Science<br/> 
+<sub_title1> Introduction à R</sub_title1> <img src="intro.png"  id="img_intro">
+
+
+## Qu'est-ce que la Data Science? 
+         
+> * Transformation de données brutes
+> * En informations 
+> * Afin de répondre à des questions
+
+
+## Workflow d'un projet Data Science
+
+```{r,  warning=FALSE, message=FALSE, echo=FALSE}
+library(visNetwork)
+library(dplyr)
+
+
+nodes <- data.frame(id = 0:6, 
+                    group = LETTERS[seq(1: 7)],
+                    label=c('Problem', 'Import', 'Transform', 'Visualize', 'Model', 'Communicate', 'Diffusion'))
+edges <- data.frame(from = c(0,1,2,3,4,4,5), to = c(1,2,3,4,5,6,2))
+
+visNetwork(nodes, edges, width = "100%") %>% 
+  visEdges(arrows =list(to = list(enabled = TRUE, scaleFactor = 2))) %>% 
+  visGroups(groupname = "A", shape = "icon", 
+            icon = list(code = "f0eb" , color = "orange"
+            )) %>%
+  visGroups(groupname = "B", shape = "icon", 
+            icon = list(code = "f1c0" , color = "grey"
+                        )) %>%
+  visGroups(groupname = "C", shape = "icon", 
+            icon = list(code = "f0d0" , color = "#175186"
+            )) %>%
+  visGroups(groupname = "D", shape = "icon", 
+            icon = list(code = "f200" , color = "#175186"
+            )) %>%
+  visGroups(groupname = "E", shape = "icon", 
+            icon = list(code = "f1b3", color = "#175186"
+            )) %>%
+  visGroups(groupname = "F", shape = "icon", 
+            icon = list(code = "f086", color = "#175186"
+            ))%>%
+  visGroups(groupname = "G", shape = "icon", 
+            icon = list(code = "f09e", color = "#bca480"
+            )) %>%
+  addFontAwesome()
+
+
+
+```
+
+
+
+
+
+
+## Qu'est-ce que R? <span style="color:white;">ok ok ok</span> 
+         
+> * Un logiciel
+> * Un language de programmation
+> * <span style="color:#bca480;">Open Source</span>
+
+## Qu'est-ce qu'on peut faire avec R?
+
+> * Data manipulation
+> * Statistiques avancées 
+> * Machine learning
+> * Visualisation
+> * Web application
+
+
+## Apercu des visualisations
+Graphique simple
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+pacman::p_load(BBmisc, tidyverse,  hablar, ggbump, sf, rnaturalearth, feather, janitor, lubridate, viridis)
+
+
+# create a dataset
+df <- data.frame(
+  name=c( rep("A",500), rep("B",500), rep("B",500), rep("C",20), rep('D', 100)  ),
+  value=c( rnorm(500, 10, 5), rnorm(500, 13, 1), rnorm(500, 18, 1), rnorm(20, 25, 4), rnorm(100, 12, 1) )
+)
+# Boxplot basic
+df %>%
+  ggplot( aes(x=name, y=value, fill=name)) +
+    geom_boxplot() +
+    scale_fill_viridis(discrete = TRUE, alpha=0.6, option="A") +
+    theme_minimal() +
+    theme(
+      legend.position="none",
+      plot.title = element_text(size=11)
+    ) +
+    ggtitle(" ") +
+    xlab("")
+```
+
+
+## Apercu des visualisations
+Graphique Avancé
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+options(stringsAsFactors = F)
+
+gdpr_violations <- readr::read_tsv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-04-21/gdpr_violations.tsv')
+
+df <- gdpr_violations %>% 
+  group_by(name) %>% 
+  summarise(price = sum_(price)) %>% 
+  ungroup()
+
+sdf <- rnaturalearthdata::countries50 %>% 
+  st_as_sf() %>% 
+  st_crop(xmin = -24, xmax = 31, ymin = 33, ymax = 73) %>% 
+  filter(admin %in% df$name) %>% 
+  left_join(df, by = c("admin" = "name")) %>% 
+  mutate(price_cap  = price / pop_est,
+         admin = case_when(admin == "United Kingdom" ~ "UK",
+                           admin == "Czech Republic" ~ "Czech",
+                           T ~ admin))
+
+ranking <- st_geometry(sdf) %>% 
+  st_point_on_surface() %>% 
+  st_coordinates() %>% 
+  as_tibble() %>% 
+  bind_cols(tibble(fine_cap = normalize(rank(sdf$price_cap), range = c(40.12161, 66.12161), method = "range"),
+                   country = sdf$admin,
+                   xend = 60,
+                   x_axis_start = xend + 10,
+                   fine_cap_x = normalize(sdf$price_cap, range = c(first(x_axis_start), 100), method = "range"),
+                   val_txt = paste0(format(sdf$price_cap, digits = 0, nsmall = 2)),
+                   val_txt2 = if_else(country == "Austria", paste0(val_txt, "€ per capita"), val_txt)))
+
+sdf <- sdf %>% 
+  bind_cols(ranking %>% select(fine_cap))
+
+ggplot() + 
+  geom_sf(data = sdf, size = .3, aes(geometry = geometry), fill = "transparent", color = "gray17") +
+  coord_sf(crs = st_crs(sdf))+
+  # Sigmoid from country to start of barchart
+  geom_sigmoid(data = ranking, 
+               aes(x = X, y = Y, xend = x_axis_start - .2, yend = fine_cap, group = country, color = fine_cap), 
+               alpha = .6, smooth = 10, size = 1) + 
+  # Line from xstart to value
+  geom_segment(data = ranking, 
+               aes(x = x_axis_start, y = fine_cap, xend = fine_cap_x, yend = fine_cap, color = fine_cap), alpha = .6, size = 1, 
+               lineend = "round") + 
+  # Y axis - black line
+  geom_segment(data = ranking, 
+               aes(x = x_axis_start, y = 40, xend = x_axis_start, yend = 67), alpha = .6, size = 1.3, color = "black") +
+  # dot on centroid of country in map
+  geom_point(data = ranking, 
+             aes(x = X, y = Y, color = fine_cap), size = 2) +
+  # Country text
+  geom_text(data = ranking, aes(x = x_axis_start-.5, y = fine_cap, label = country, color = fine_cap), hjust = 1, size = 2.5, nudge_y = .5) +
+  # Value text
+  geom_text(data = ranking, aes(x = fine_cap_x, y = fine_cap, label = val_txt2, color = fine_cap), hjust = 0, size = 2, nudge_x = .4) +
+  coord_sf(clip = "off") +
+  scale_fill_viridis_c() +
+  scale_color_viridis_c() +
+  theme_void() +
+  labs(title = "GDPR fines per capita",
+       subtitle = str_wrap("The General Data Protection Regulation (EU) 2016/679 (GDPR) is a regulation in EU law on data protection and privacy in the European Union (EU) and the European Economic Area (EEA).", 100),
+       caption = "Source: TidyTuesday & Wikipedia") + 
+  theme(plot.margin = margin(.5, 1, .5, .5, "cm"),
+        legend.position = "none",
+        plot.background = element_rect(fill = "black"),
+        plot.caption = element_text(color = "gray40"),
+        plot.title = element_text(color = "gray40", size = 16, family = "Helvetica", face = "bold"),
+        plot.subtitle = element_text(color = "gray40", size = 8))
+```
+
+
+## Apercu des visualisations
+Graphique Interactif
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+data(economics_long, package = "ggplot2")
+library(highcharter)
+library(dplyr)
+
+economics_long2 <- economics_long %>% 
+  filter(variable %in% c("pop", "uempmed", "unemploy")) 
+hchart(economics_long2, "line", hcaes(x = date, y = value01, group = variable)) %>% 
+  hc_title(text = "Random Chart") %>% 
+  hc_subtitle(text = htmltools::HTML('Source: <a href="http://jkunst.com/highcharter/hchart.html" target="_blank" style="color:blue;">Highcharter</a>'))
+```
+
+## Apercu d'une application
+Suivi du mot-clef #rstat sur Twitter <br>
+<a href="https://gallery.shinyapps.io/cran-explorer/?_ga=2.258467914.1784317403.1589662256-416709235.1545587737" target="_blank">
+    <img width="500" align="center"  src="image/session1/shiny_app3.png"/> 
+</a>
+
+
+##
+
+<img height="200" style="margin: 15px 3em; !important" src="image/session1/notR.png">
+<img class="fragment" data-fragment-index="2" height="200" style="margin: 15px 3em; !important" src="image/session1/rstudiologo.png"><br>
+<span class="fragment" data-fragment-index="1">
+Nous n'allons pas utiliser R <br>
+<span class="fragment" data-fragment-index="2">
+mais R Studio 
+</span>
+</span>
+
+## Pourquoi cela?
+
+<img height="250" class="fragment fade-in"src="image/session1/shell.png">
+<img height="250" class="fragment fade-in" src="image/session1/interface.png">
+
+
+## Ouvrez R Studio 
+
+<img class="fragment fade-in" height="400" src="image/session1/rstudio_1.png">
+
+> * 1: Script - écriture du programme
+> * 2: Console - excécution du programme
+> * 3: Environnement - l'ensemble des objets enregistrés
+> * 4: Files - l'arborescence des fichiers
+
+## Ajouter des Packages
+<img  height="250" class="fragment fade-in" src="image/session1/app.png">
+<img  height="250" class="fragment fade-in" src="image/session1/download.png">
+
+
+
+## <span style="color:black;">Installation de Packages </span>{data-background=#eaf3f9}
+
+
+## Packages <span style="color:#bca480;"> tidyverse </span>
+
+
+```{r, eval=FALSE}
+install.packages('tidyverse')
+```
+> * Facilite la manipulation de données
+> * Meilleure visualisation 
+> * D'autres avantages que nous verrons par la suite 
+
+
+
+<!--## Notions importantes
+
+> * Les données
+> * Les fonctions
+> * Les objets déclarés
+
+
+<span class="fragment fade-in" style="color:#bca480;"> Les données se présentent sous forme de tableau </span>
+
+
+## 
+aide pour la syntaxe [R Markdown](https://rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf)
+-->
+
+## Creation du dataset
+```{r}
+set.seed(23) # pour que nous ayons tous les même chiffres aleatoires
+
+n <- 10000 # on donne 10 000 comme valeur à `n`
+
+seg <- c(101:106, 110, 201:202, 204:209, 211:220, 294, 301:306, 399, 507, 517, 412)
+segment <- sample(seg, n, replace = TRUE) # 
+
+id_client <- sample(1:7000, n, replace = TRUE) # 
+credit <- rweibull(n, 1, 10^7)
+gestion_discret <- rweibull(n, 1, 10^7)
+titre <- rweibull(n, 1, 10^7)
+cash <- rweibull(n, 1, 10^7)
+autre_actif_geres <- rweibull(n, 1, 10^7)
+
+bank <- tibble(id_client, segment, credit, gestion_discret, titre, cash, autre_actif_geres)
+
+m <-  7000
+profession <- c('professeur', 'politicien', 'retraité', 'ingénieur', 'avocat',
+                'medecin', 'chirurgien', "directeur d'entreprise", 'etudiant',
+                'commercant', 'cadre', 'fonctionnaire', 'architecte', 'veterinaire',
+                'manager', 'partner', 'heritier', 'rentier')
+
+profession <-sample(profession, m, replace = TRUE) # 
+
+age <- rweibull(m, 6, 60)
+sex <- ifelse(runif(m,0,1)<0.6,'homme', 'femme')
+lien_famille <- sample(1:5000, m, replace = TRUE)
+recommandation <-  sample(1:7000, m, replace = TRUE)
+
+
+client <- tibble(profession, age, sex, lien_famille, recommandation)
+
+```
+
+## <span style="color:black;">Manipulation de données </span>{data-background=#eaf3f9}
+
+> * <span> `%>%` (pipe operator) </span>
+> * <span> select()  </span>
+> * <span> filter()  </span>
+> * <span> summarise() </span>
+> * <span> group_by()  </span>
+> * <span> mutate()  </span>
+> * <span> inner_join()  </span>
+
+
+
+## select()
+<img  height="250" class='tidyverse_image' src="image/tidyverse/select.png">
+
+```{r}
+bank %>% 
+  select(id_client, segment) %>% 
+  head(5)
+```
+
+
+## filter()
+<img  height="250" class='tidyverse_image' src="image/tidyverse/filter.png">
+```{r}
+# Pour les opérations, les characteres correspondent respectivement à
+# a. `==` ----> égale         c. `|`  ----> ou 
+# b. %in% ----> dans          d. `&`  ----> et 
+bank %>%
+  filter(segment %in% c(101:106) & cash > 800000) %>% 
+  head(3)
+
+```
+  
+## summarise()
+<img  height="250" class='tidyverse_image' src="image/tidyverse/summarise.png">
+```{r}
+# Pour les opérations de groupe, min, max, mean, median, quantile
+bank %>% 
+  summarise(mean_cash = mean(cash), mean_discret = mean(gestion_discret)) 
+```
+
+## group_by()
+<img  height="250" class='tidyverse_image' src="image/tidyverse/group_by.png">
+```{r}
+# Pour les opérations groupées
+bank %>% 
+  group_by(segment) %>% 
+  head(5)
+```
+## group_by() %>% summarise()
+<img  height="250" class='tidyverse_image' src="image/tidyverse/group_sum.png">
+```{r}
+# Pour les opérations groupées
+bank %>% 
+  group_by(segment) %>% 
+  summarise(mean_cash = mean(cash), mean_discret = mean(gestion_discret)) %>% 
+  head(5)
+
+```
+## mutate()
+<img  height="250" class='tidyverse_image' src="image/tidyverse/mutate.png">
+```{r}
+# Ajouter une nouvelle colonne
+gest<- c('Karl Marx', 'Joseph Schumpeter', 'John Keynes', 'Milton Firedman', 'Adam Smith', 'Joseph Stigliz','Friedrich Hayek',
+         'David Ricardo', 'Thomas Malthus', 'Jean-Baptiste Say', 'Alfred Marshall', 'Paul Samuelson','Irving Fisher', 
+         'Raghuram Rajan', 'Hyman Minsky', 'Amartya Sen', 'Andrew Lo', 'John Forbes Nash')
+bank %>% 
+  mutate(responsable = sample(gest, n, replace = TRUE)) %>% 
+  head(2)
+
+```
+
+
+## inner_join()
+<img  height="250" class='tidyverse_image' src="image/tidyverse/join.png">
+```{r}
+# Pour les opérations groupées
+client %>% 
+  mutate(id=1:7000) %>% 
+  inner_join(bank, by = c('id'='id_client')) %>% 
+  head(3)
+```
+
+
+
+## <span style="color:white;">Récapitulatif </span>{data-background=#7ac58c}
+<!--<img src="transition1.png"  id="img_transition"> -->
+
+
+
+## {data-background=#7ac58c}
+> * <span style="color:white;"> Data Science transforme les données en information </span>
+> * <span style="color:white;"> R permet d'élaborer un projet Data Science </span>
+> * <span style="color:white;"> Les fonctions qui transforment les données </span>
+
+
+
+## {data-background=#00bdf2} 
+<span style="color:white;">Merci pour votre attention </span>
+
+## <span style="color:white;">Questions? </span>{data-background=#00bdf2}
+<!--<img src="transition2.png"  id="img_transition2"> -->
+
+
+
+## <span style="color:white;"> </span>{data-background=#00bdf2}
+> * <span class="fragment fade-out" style="color:white;">Est-ce que dans votre environnement de travail, ça vaut la peine?</span> 
+> * <span style="color:white;">Ou trouver cette présentation?</span>
+
+## <span style="color:white;">Contact</span> {data-background=#00bdf2}
+[Kevin Rosamont Prombo](kevinrosamont@ymail.com)
+
+<!--
+> *  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color:black;"> Un package et ses fonctions </span>
+> *  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color:black;"> Fonction avancées Regex </span>
+> *  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color:black;"> Fonctionnement Shiny </span>
+-->
+
+
+
+
+

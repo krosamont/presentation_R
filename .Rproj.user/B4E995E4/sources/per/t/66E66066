@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1589746137036.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2051960865",
+    "id" : "66E66066",
+    "lastKnownWriteTime" : 1589451311,
+    "last_content_update" : 1589451311,
+    "path" : "~/Documents/dataScience/bdl_presentation/1_rmarkdown.Rmd",
+    "project_path" : "1_rmarkdown.Rmd",
+    "properties" : {
+        "cursorPosition" : "52,0",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

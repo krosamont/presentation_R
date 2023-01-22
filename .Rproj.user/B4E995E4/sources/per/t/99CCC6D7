@@ -1,0 +1,33 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1593002507157.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "99CCC6D7",
+    "lastKnownWriteTime" : 1,
+    "last_content_update" : 1593002507157,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "3DF60E5B",
+        "caption" : "fish2",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=fish2&cache_key=3DF60E5B",
+        "displayedObservations" : "560",
+        "environment" : "",
+        "expression" : "fish2",
+        "object" : "fish2",
+        "preview" : "0",
+        "totalObservations" : "560",
+        "variables" : "7"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 29,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}
