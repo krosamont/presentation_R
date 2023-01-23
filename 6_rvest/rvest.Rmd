@@ -605,11 +605,14 @@ function(el,x) {
     d3.selectAll(".node").on("mouseover", mouseover).on("mouseout", mouseout);
 }
 '
-onRender(fn, customJS)
+htmlwidgets::saveWidget(widget = onRender(fn, customJS),
+                        file = "relation_dax30.html",
+                        selfcontained = TRUE)
 
 
 ```
 
+<iframe src = "relation_dax30.html" width="900" height="600"></iframe>
 
 ## <span style="color:white;">Récapitulatif </span>{data-background=#7ac58c}
 

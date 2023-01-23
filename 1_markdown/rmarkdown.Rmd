@@ -108,7 +108,7 @@ Aide pour la syntaxe [R Markdown](https://rstudio.com/wp-content/uploads/2015/02
 
 ## {data-background=#7ac58c}
 > * <span style="color:white;"> Présentation facile à faire (même principe que Jupyter)</span>
-> * <span style="color:white;"> Donne un apercu dynamique des résultats </span>
+> * <span style="color:white;"> Donne un aperçu dynamique des résultats </span>
 > * <span style="color:white;"> Pratique pour les présentations courtes & techniques </span>
 
 
@@ -117,13 +117,6 @@ Aide pour la syntaxe [R Markdown](https://rstudio.com/wp-content/uploads/2015/02
 <span style="color:white;">Merci pour votre attention </span>
 
 ## <span style="color:white;">Questions? </span>{data-background=#00bdf2}
-
-
-<!--
-## <span style="color:white;"> </span>{data-background=#00bdf2}
-> * <span class="fragment fade-out" style="color:white;">Est-ce que dans notre environnement de travail, ça vaut la peine?</span> 
-> * <span style="color:white;">Ou trouver un exemple de présentation?</span>
--->
 
 
 
